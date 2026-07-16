@@ -30,38 +30,37 @@
   const params = new URLSearchParams(window.location.search);
   let cameraName = params.get('camera_model');
 
-  // Force the test card to recognize the broken Tally variable
-  if (cameraName === '{camera_model}') {
-    cameraName = 'Sony A7IV Portrait Bright Natural';
-  }
-
-  // We are using the RAW GitHub URL because the /cards/ folder is broken on your live site
+  // --- THE MAGIC MAP (Add your 199 cards here) ---
   const pdfMap = {
-    "Sony A7IV Portrait Bright Natural": "https://raw.githubusercontent.com/CamerasDecoded/camerasdecoded-settings/main/cards/sony-a7iv-portrait-bright-natural-card.pdf"
+    "Sony A7IV Portrait Bright Natural": "cards/sony-a7iv-portrait-bright-natural-card.pdf"
+    // Example for the next one:
+    // "Sony A7IV Sports Low Light": "cards/sony-a7iv-sports-low-light-card.pdf",
+    // "Canon R6 Mark II Portrait Golden Hour": "cards/canon-r6-markii-portrait-golden-hour-card.pdf",
   };
+  // ----------------------------------------------------
 
   let pdfPath = pdfMap[cameraName];
 
-  // Hide the camera label text
+  // Hide the camera label text (per your request)
   document.getElementById('cameraLabel').style.display = 'none';
 
   if (pdfPath) {
+    // Show the real download button
     document.getElementById('downloadBtn').innerText = '⬇️ Download Your PDF';
-    document.getElementById('downloadBtn').href = pdfPath;
+    document.getElementById('downloadBtn').onclick = function() {
+      window.open(pdfPath, '_blank');
+    };
 
     // Auto-open the PDF in a new tab after 2 seconds
     setTimeout(() => {
       window.open(pdfPath, '_blank');
     }, 2000);
   } else {
+    // If the card isn't in the map yet, show the Return button
     document.getElementById('downloadBtn').innerText = 'Return to Atlas';
-    document.getElementById('downloadBtn').href = 'index.html';
-  }
-
-  function triggerDownload() {
-    if (pdfPath) {
-      window.open(pdfPath, '_blank');
-    }
+    document.getElementById('downloadBtn').onclick = function() {
+      window.location.href = 'index.html';
+    };
   }
 </script>
 </body>
