@@ -13,8 +13,6 @@
     .success-box p { color: #b4b4b4; font-size: 14px; }
     #downloadBtn { display: inline-block; margin-top: 30px; padding: 14px 40px; border: 1px solid #8deb00; color: #8deb00; background: transparent; border-radius: 30px; text-decoration: none; font-family: 'Space Mono', monospace; font-size: 14px; transition: 0.2s; }
     #downloadBtn:hover { background: #8deb00; color: #000; }
-    .loading-dots::after { content: '...'; animation: dots 1.2s steps(3, end) infinite; }
-    @keyframes dots { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
   </style>
 </head>
 <body>
@@ -24,7 +22,6 @@
     <h2 id="cameraLabel">Your download is starting...</h2>
     <p style="margin-top:10px;">If the download doesn't start automatically, click the button below.</p>
     
-    <!-- The Download Button (used as fallback and primary trigger) -->
     <a id="downloadBtn" href="#" onclick="triggerDownload()">⬇️ Download Your PDF</a>
   </div>
 </div>
@@ -32,11 +29,12 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const pdf = params.get('pdf');
-  const camera = params.get('camera') || 'Snapshot Card';
+  // UPDATED: Look for 'camera_model' instead of 'camera'
+  const cameraModel = params.get('camera_model') || 'Snapshot Card';
 
   // Set the camera model text on the page
-  if(camera) {
-    document.getElementById('cameraLabel').innerText = `"${decodeURIComponent(camera)}" is ready.`;
+  if(cameraModel) {
+    document.getElementById('cameraLabel').innerText = `"${decodeURIComponent(cameraModel)}" is ready.`;
   }
 
   // Automatically start download after 2 seconds
