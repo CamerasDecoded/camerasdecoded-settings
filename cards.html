@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snapshot Cards — Decoder Atlas</title>
+  <meta name="description" content="Download free printable Snapshot Cards for Sony, Canon, Nikon, and Fuji mirrorless cameras.">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0A0A0A;
+      color: #FFFFFF;
+      font-family: 'Courier New', monospace;
+      padding: 40px 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .brand {
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      color: #0FFF50;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 40px;
+      border-bottom: 1px solid #1A1A1A;
+      padding-bottom: 15px;
+    }
+    .brand a {
+      color: #0FFF50;
+      text-decoration: none;
+    }
+    .nav-links {
+      margin-top: 10px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: #0FFF50;
+      text-decoration: none;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+    .hero h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: 36px;
+      color: #0FFF50;
+      margin-bottom: 8px;
+    }
+    .hero .subtitle {
+      color: #888;
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+      margin-top: 20px;
+    }
+    .card-item {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      transition: 0.2s;
+    }
+    .card-item:hover {
+      border-color: #0FFF50;
+    }
+    .card-item img {
+      width: 100%;
+      max-width: 200px;
+      height: auto;
+      border-radius: 4px;
+      border: 1px solid #222;
+      margin-bottom: 12px;
+    }
+    .card-item .card-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      color: #0FFF50;
+      margin-bottom: 4px;
+    }
+    .card-item .card-meta {
+      color: #888;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .card-item .btn {
+      display: inline-block;
+      background: transparent;
+      color: #0FFF50;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      text-decoration: none;
+      padding: 8px 18px;
+      border: 1px solid #0FFF50;
+      border-radius: 20px;
+      transition: 0.2s;
+    }
+    .card-item .btn:hover {
+      background: #0FFF50;
+      color: #0A0A0A;
+    }
+    .footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid #1A1A1A;
+      font-size: 12px;
+      color: #444;
+      text-align: center;
+    }
+    .footer a {
+      color: #0FFF50;
+      text-decoration: none;
+    }
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 28px; }
+      .card-grid { grid-template-columns: 1fr; }
+      .nav-links { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Brand Header -->
+  <div class="brand">
+    <a href="https://camerasdecoded.com">CAMERAS DECODED</a> / <a href="https://atlas.camerasdecoded.com">DECODER ATLAS</a> / SETTINGS
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-links">
+    <a href="index.html">🏠 Home</a>
+    <a href="cards.html">📸 Snapshot Cards</a>
+    <a href="protocols.html">📡 Protocol Library</a>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>📸 Snapshot Cards</h1>
+    <div class="subtitle">Download printable one‑page reference cards for your camera and scenario.</div>
+  </div>
+
+  <!-- Card Grid -->
+  <div class="card-grid" id="cardGrid">
+    <!-- Cards will be populated by JavaScript -->
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <a href="https://camerasdecoded.com">camerasdecoded.com</a> · 
+    <a href="https://atlas.camerasdecoded.com">atlas.camerasdecoded.com</a><br>
+    © Cameras Decoded — Operator Confidence Curriculum
+  </div>
+
+  <script>
+    const cards = [
+      // --- Sony A7IV ---
+      {
+        title: "Sony A7IV — Portrait Low Light",
+        image: "cards/sony-a7iv-portrait-low-light-card.png",
+        pdf: "cards/sony-a7iv-portrait-low-light-card.pdf",
+        camera: "Sony A7IV",
+        scenario: "Portrait — Low Light"
+      },
+      {
+        title: "Sony A7IV — Event Indoor Artificial",
+        image: "cards/sony-a7iv-event-indoor-artificial-card.png",
+        pdf: "cards/sony-a7iv-event-indoor-artificial-card.pdf",
+        camera: "Sony A7IV",
+        scenario: "Event — Indoor Artificial"
+      },
+      {
+        title: "Sony A7IV — Sports Low Light",
+        image: "cards/sony-a7iv-sports-low-light-card.png",
+        pdf: "cards/sony-a7iv-sports-low-light-card.pdf",
+        camera: "Sony A7IV",
+        scenario: "Sports — Low Light"
+      },
+
+      // --- Canon R6 Mark II ---
+      {
+        title: "Canon R6 II — Portrait Golden Hour",
+        image: "cards/canon-r6-markii-portrait-golden-hour-card.png",
+        pdf: "cards/canon-r6-markii-portrait-golden-hour-card.pdf",
+        camera: "Canon R6 Mark II",
+        scenario: "Portrait — Golden Hour"
+      },
+
+      // --- Fujifilm X-T5 ---
+      {
+        title: "Fujifilm X-T5 — Street Bright Natural",
+        image: "cards/fujifilm-x-t5-street-bright-natural-card.png",
+        pdf: "cards/fujifilm-x-t5-street-bright-natural-card.pdf",
+        camera: "Fujifilm X-T5",
+        scenario: "Street — Bright Natural"
+      },
+
+      // --- Nikon Z6 III ---
+      {
+        title: "Nikon Z6 III — Sports Low Light",
+        image: "cards/nikon-z6-iii-sports-low-light-card.png",
+        pdf: "cards/nikon-z6-iii-sports-low-light-card.pdf",
+        camera: "Nikon Z6 III",
+        scenario: "Sports — Low Light"
+      },
+
+      // --- Sony A6700 ---
+      {
+        title: "Sony A6700 — Portrait Bright Natural",
+        image: "cards/sony-a6700-portrait-bright-natural-card.png",
+        pdf: "cards/sony-a6700-portrait-bright-natural-card.pdf",
+        camera: "Sony A6700",
+        scenario: "Portrait — Bright Natural"
+      }
+    ];
+
+    function renderCards() {
+      const grid = document.getElementById('cardGrid');
+      grid.innerHTML = '';
+      
+      cards.forEach(card => {
+        const item = document.createElement('div');
+        item.className = 'card-item';
+        item.innerHTML = `
+          <img src="${card.image}" alt="${card.title}" loading="lazy">
+          <div class="card-title">${card.camera}</div>
+          <div class="card-meta">${card.scenario}</div>
+          <a href="${card.pdf}" class="btn" target="_blank">📥 Download PDF</a>
+        `;
+        grid.appendChild(item);
+      });
+    }
+
+    renderCards();
+  </script>
+
+</body>
+</html>
