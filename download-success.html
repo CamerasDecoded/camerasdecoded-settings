@@ -31,25 +31,26 @@
   const pdf = params.get('pdf');
   const cameraModel = params.get('camera_model') || 'Snapshot Card';
 
-  // Set the camera model text on the page
-  if(cameraModel) {
+  // If the camera model is available, show it
+  if(cameraModel && cameraModel !== '{camera_model}') {
     document.getElementById('cameraLabel').innerText = `"${decodeURIComponent(cameraModel)}" is ready.`;
+  } else {
+    document.getElementById('cameraLabel').innerText = `Your download is ready.`;
   }
 
-  // Automatically start download after 2 seconds
-  if(pdf) {
-    setTimeout(() => {
-      // The '/' ensures it looks at the root domain: https://settings.camerasdecoded.com/cards/...
-      window.open('/' + decodeURIComponent(pdf), '_blank');
-    }, 2000);
+  // If we have a real PDF link, enable the button to open it
+  if(pdf && pdf !== '{pdf_url}') {
+    document.getElementById('downloadBtn').href = decodeURIComponent(pdf);
+    document.getElementById('downloadBtn').innerText = '⬇️ Download Your PDF';
+    // PREVENT THE AUTO-404: We removed the setTimeout that auto-opened the PDF.
   } else {
-    document.getElementById('cameraLabel').innerText = "File not found.";
+    document.getElementById('cameraLabel').innerText = "File is ready. Click the button below.";
   }
 
   function triggerDownload() {
-    if(!pdf) return;
+    if(!pdf || pdf === '{pdf_url}') return;
     document.getElementById('downloadBtn').innerText = "Downloading...";
-    window.open('/' + decodeURIComponent(pdf), '_blank');
+    window.open(decodeURIComponent(pdf), '_blank');
   }
 </script>
 </body>
