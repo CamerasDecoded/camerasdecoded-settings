@@ -28,29 +28,37 @@
 
 <script>
   const params = new URLSearchParams(window.location.search);
-  const pdf = params.get('pdf');
-  const cameraModel = params.get('camera_model') || 'Snapshot Card';
+  const cameraName = params.get('camera_model');
 
-  // If the camera model is available, show it
-  if(cameraModel && cameraModel !== '{camera_model}') {
-    document.getElementById('cameraLabel').innerText = `"${decodeURIComponent(cameraModel)}" is ready.`;
-  } else {
-    document.getElementById('cameraLabel').innerText = `Your download is ready.`;
-  }
+  // --- The Magic Map (Add one line here for every card) ---
+  const pdfMap = {
+    "Sony A7IV Portrait Bright Natural": "cards/sony-a7iv-portrait-bright-natural-card.pdf",
+    // Add your other 199 cards here in the future, e.g.:
+    // "Sony A7IV Sports Low Light": "cards/sony-a7iv-sports-low-light-card.pdf",
+    // "Canon R6 Mark II Portrait Golden Hour": "cards/canon-r6-markii-portrait-golden-hour-card.pdf",
+  };
+  // -------------------------------------------------------
 
-  // If we have a real PDF link, enable the button to open it
-  if(pdf && pdf !== '{pdf_url}') {
-    document.getElementById('downloadBtn').href = decodeURIComponent(pdf);
-    document.getElementById('downloadBtn').innerText = '⬇️ Download Your PDF';
-    // PREVENT THE AUTO-404: We removed the setTimeout that auto-opened the PDF.
+  // Find the correct PDF based on what Tally sent us
+  let pdfPath = pdfMap[cameraName];
+
+  // Hiding the camera name text, since you don't need it
+  document.getElementById('cameraLabel').style.display = 'none';
+
+  // If we found a file, open it in a new tab after 2 seconds
+  if(pdfPath) {
+    setTimeout(() => {
+      window.open(pdfPath, '_blank');
+    }, 2000);
   } else {
-    document.getElementById('cameraLabel').innerText = "File is ready. Click the button below.";
+    document.getElementById('downloadBtn').innerText = "Return to Atlas";
+    document.getElementById('downloadBtn').href = "index.html";
   }
 
   function triggerDownload() {
-    if(!pdf || pdf === '{pdf_url}') return;
-    document.getElementById('downloadBtn').innerText = "Downloading...";
-    window.open(decodeURIComponent(pdf), '_blank');
+    if(pdfPath) {
+      window.open(pdfPath, '_blank');
+    }
   }
 </script>
 </body>
