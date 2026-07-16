@@ -159,5 +159,47 @@
   });
 </script>
 
+<!-- NEW MASTER SCRIPT STARTS HERE -->
+<script>
+  // --- THE MASTER ASSET MAP (Add your cards here) ---
+  const pdfAssetMap = {
+    "/sony-a7iv-portrait-bright-natural": "cards/sony-a7iv-portrait-bright-natural-card.pdf"
+  };
+
+  // --- LISTEN FOR TALLY SUBMISSIONS ---
+  window.addEventListener('message', (e) => {
+    if (e && e.data && typeof e.data === 'string' && e.data.includes('Tally.FormSubmitted')) {
+      try {
+        const payload = JSON.parse(e.data);
+        const fields = payload.data.fields;
+
+        const pageField = fields.find(field => field.name === 'originPage');
+        if (pageField && pageField.value) {
+          let detectedPath = pageField.value;
+          if (detectedPath.includes('://')) {
+            try {
+              detectedPath = new URL(detectedPath).pathname;
+            } catch (urlErr) {
+              detectedPath = '/' + detectedPath.split('.com/')[1];
+            }
+          }
+          if (detectedPath.endsWith('/') && detectedPath.length > 1) {
+            detectedPath = detectedPath.slice(0, -1);
+          }
+          const finalDownloadUrl = pdfAssetMap[detectedPath];
+          if (finalDownloadUrl) {
+            window.open(finalDownloadUrl, '_blank');
+          } else {
+            console.warn("No PDF configured for URL path: " + detectedPath);
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing Tally submission:", error);
+      }
+    }
+  });
+</script>
+<!-- NEW MASTER SCRIPT ENDS HERE -->
+
 </body>
 </html>
