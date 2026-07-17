@@ -1,46 +1,46 @@
 <script>
-  // --- 1. Get the referring page path ---
-  let path = '';
-  try {
-    const referrer = document.referrer;
-    if (referrer) {
-      const url = new URL(referrer);
-      path = url.pathname.toLowerCase(); // forces lowercase to avoid case mismatch
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    let cardKey = urlParams.get('card');
+    const btn = document.getElementById('downloadBtn');
+
+    if (cardKey) {
+      cardKey = cardKey.toLowerCase().trim();
+
+      // --- MASTER ASSET MAP (Using raw GitHub URLs) ---
+      const pdfMap = {
+        "sony-a7iv": "https://raw.githubusercontent.com/CamerasDecoded/camerasdecoded-settings/main/cards/sony-a7iv-portrait-bright-natural-card.pdf"
+        // Remaining 198 will go here
+      };
+
+      const pdfUrl = pdfMap[cardKey];
+
+      if (pdfUrl) {
+        if (btn) btn.innerText = '⬇️ Download Your PDF';
+
+        const executeDownload = () => {
+          const link = document.createElement('a');
+          link.href = pdfUrl;
+          link.download = pdfUrl.split('/').pop();
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        };
+
+        setTimeout(executeDownload, 1500); // Auto-download
+        if (btn) btn.onclick = (e) => { e.preventDefault(); executeDownload(); };
+      } else {
+        if (btn) {
+          btn.innerText = 'Return to Atlas';
+          btn.onclick = () => { window.location.href = 'index.html'; };
+        }
+        console.warn("No asset for key: " + cardKey);
+      }
+    } else {
+      if (btn) {
+        btn.innerText = 'Return to Atlas';
+        btn.onclick = () => { window.location.href = 'index.html'; };
+      }
     }
-  } catch (e) { /* ignore */ }
-
-  // --- 2. Asset map (keys must match the URL path) ---
-  const pdfMap = {
-    "/sony-a7iv-portrait-bright-natural": "cards/sony-a7iv-portrait-bright-natural-card.pdf"
-    // We'll add the other 198 cards here later
-  };
-
-  // --- 3. Find and trigger the download ---
-  const pdf = pdfMap[path];
-  const btn = document.getElementById('downloadBtn');
-
-  if (pdf) {
-    btn.innerText = '⬇️ Download Your PDF';
-    // Auto‑download after 1.5 seconds
-    setTimeout(() => {
-      const link = document.createElement('a');
-      link.href = pdf;
-      link.download = pdf.split('/').pop(); // forces a download, not a preview
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }, 1500);
-    // Also make the button work if the auto‑download fails
-    btn.onclick = function() {
-      const link = document.createElement('a');
-      link.href = pdf;
-      link.download = pdf.split('/').pop();
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    };
-  } else {
-    btn.innerText = 'Return to Atlas';
-    btn.onclick = function() { window.location.href = 'index.html'; };
-  }
+  });
 </script>
