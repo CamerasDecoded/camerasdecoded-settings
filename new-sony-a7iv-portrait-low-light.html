@@ -1,489 +1,311 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "Sony A7IV Portrait Low Light Settings",
-    "description": "Exact camera settings for Sony A7IV portrait photography in low light. Mode: Manual, Shutter: 1/125s, Aperture: f/1.4, ISO: Auto cap 6400.",
-    "author": {
-      "@type": "Person",
-      "name": "The Signal Keeper"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Cameras Decoded",
-      "url": "https://camerasdecoded.com"
-    },
-    "datePublished": "2026-07-06",
-    "dateModified": "2026-07-06"
-  }
-  </script>
-
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sony A7IV Portrait Low Light Settings — Decoder Atlas</title>
-  <meta name="description" content="Exact camera settings for Sony A7IV portrait photography in low light. Mode: Manual, Shutter: 1/125s, Aperture: f/1.4, ISO: Auto cap 6400.">
-  
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  
-  <style>
-    /* === Page Styles === */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #0A0A0A;
-      color: #FFFFFF;
-      font-family: 'Courier New', monospace;
-      padding: 40px 20px;
-      max-width: 900px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-    .brand {
-      font-family: 'Space Mono', monospace;
-      font-size: 14px;
-      color: #0FFF50;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #1A1A1A;
-      padding-bottom: 15px;
-    }
-    .brand a {
-      color: #0FFF50;
-      text-decoration: none;
-    }
-    .nav-links {
-      margin-top: 10px;
-      margin-bottom: 30px;
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .nav-links a {
-      color: #0FFF50;
-      text-decoration: none;
-      font-family: 'Space Mono', monospace;
-      font-size: 13px;
-      letter-spacing: 0.5px;
-    }
-    .nav-links a:hover {
-      text-decoration: underline;
-    }
-    .hero h1 {
-      font-family: 'Space Mono', monospace;
-      font-size: 28px;
-      color: #0FFF50;
-      margin-bottom: 8px;
-    }
-    .hero .subtitle {
-      color: #888;
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-    .badge {
-      display: inline-block;
-      background: #1A1A1A;
-      color: #0FFF50;
-      font-family: 'Space Mono', monospace;
-      font-size: 12px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid #0FFF50;
-      margin-bottom: 20px;
-    }
-    .settings-grid {
-      background: #111;
-      border: 1px solid #222;
-      border-radius: 8px;
-      padding: 20px 24px;
-      margin: 20px 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px 30px;
-    }
-    .settings-grid .label {
-      color: #0FFF50;
-      font-family: 'Space Mono', monospace;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .settings-grid .value {
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      color: #DDD;
-    }
-    h2 {
-      font-family: 'Space Mono', monospace;
-      font-size: 20px;
-      color: #0FFF50;
-      margin-top: 40px;
-      margin-bottom: 12px;
-      border-top: 1px solid #1A1A1A;
-      padding-top: 30px;
-    }
-    p {
-      color: #CCC;
-      font-size: 15px;
-      margin-bottom: 12px;
-    }
-    .inner-signal {
-      background: #111;
-      border-left: 3px solid #0FFF50;
-      padding: 16px 20px;
-      margin: 24px 0;
-      border-radius: 4px;
-    }
-    .inner-signal p {
-      color: #DDD;
-      font-style: italic;
-      margin: 0;
-    }
-    .inner-signal .attribution {
-      color: #0FFF50;
-      font-family: 'Space Mono', monospace;
-      font-size: 12px;
-      margin-top: 4px;
-      font-style: normal;
-    }
-    .gear-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin: 16px 0;
-    }
-    .gear-item {
-      background: #111;
-      border: 1px solid #222;
-      border-radius: 6px;
-      padding: 14px 18px;
-    }
-    .gear-item a {
-      color: #0FFF50;
-      text-decoration: none;
-      font-family: 'Space Mono', monospace;
-      font-size: 14px;
-    }
-    .gear-item a:hover {
-      text-decoration: underline;
-    }
-    .gear-item .desc {
-      color: #888;
-      font-size: 13px;
-      margin-top: 4px;
-    }
-    .disclosure {
-      color: #888;
-      font-size: 13px;
-      font-style: italic;
-      margin-bottom: 12px;
-    }
-    .cta-box {
-      background: #111;
-      border: 1px solid #0FFF50;
-      border-radius: 8px;
-      padding: 24px;
-      margin: 30px 0;
-      text-align: center;
-    }
-    .cta-box .btn {
-      display: inline-block;
-      background: transparent;
-      color: #0FFF50;
-      font-family: 'Space Mono', monospace;
-      font-size: 14px;
-      text-decoration: none;
-      padding: 12px 30px;
-      border: 1px solid #0FFF50;
-      border-radius: 30px;
-      margin-top: 10px;
-      transition: 0.2s;
-    }
-    .cta-box .btn:hover {
-      background: #0FFF50;
-      color: #0A0A0A;
-    }
-    .related-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-      margin: 16px 0;
-    }
-    .related-item {
-      background: #111;
-      border: 1px solid #222;
-      border-radius: 6px;
-      padding: 12px 16px;
-      text-align: center;
-    }
-    .related-item a {
-      color: #0FFF50;
-      text-decoration: none;
-      font-size: 13px;
-      font-family: 'Space Mono', monospace;
-    }
-    .footer {
-      margin-top: 50px;
-      padding-top: 20px;
-      border-top: 1px solid #1A1A1A;
-      font-size: 12px;
-      color: #444;
-      text-align: center;
-      font-family: 'Space Mono', monospace;
-    }
-    .footer a {
-      color: #0FFF50;
-      text-decoration: none;
-    }
-    @media (max-width: 600px) {
-      body { padding: 20px 12px; }
-      .settings-grid { grid-template-columns: 1fr; }
-      .gear-grid { grid-template-columns: 1fr; }
-      .related-grid { grid-template-columns: 1fr; }
-      .hero h1 { font-size: 22px; }
-      .nav-links { gap: 12px; }
-    }
-
-    /* === Transmission Overlay Styles === */
-    #cynetis-transmission {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #0A0A0A;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.8s ease;
-    }
-
-    .transmission-container {
-      text-align: center;
-      max-width: 600px;
-      padding: 20px;
-    }
-
-    .orb-container {
-      animation: float 3s ease-in-out infinite;
-      margin-bottom: 30px;
-    }
-
-    .orb-pulse {
-      width: 120px;
-      height: 120px;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 0.6; transform: scale(0.95); }
-      50% { opacity: 1; transform: scale(1.05); }
-      100% { opacity: 0.6; transform: scale(0.95); }
-    }
-
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-15px); }
-      100% { transform: translateY(0px); }
-    }
-
-    #typing-text {
-      font-family: 'Space Mono', monospace;
-      color: #0FFF50;
-      font-size: 18px;
-      letter-spacing: 1px;
-      display: inline-block;
-    }
-
-    #typing-text::after {
-      content: '█';
-      animation: blink 0.8s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sony A7IV – Portrait · Low Light | Cameras Decoded</title>
+    <style>
+        /* ── Reset & Base ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f6f6f8;
+            color: #1c1c1e;
+            line-height: 1.6;
+            padding: 2rem 1.5rem;
+        }
+        .card {
+            max-width: 820px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            padding: 2.5rem 2.8rem;
+        }
+        /* ── Typography ── */
+        .badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            background: #eaeef2;
+            color: #2c3e50;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            margin-bottom: 0.8rem;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+        }
+        .subhead {
+            font-size: 1.1rem;
+            color: #5e6b7a;
+            margin-bottom: 1.8rem;
+            border-left: 4px solid #d0d7dd;
+            padding-left: 1rem;
+        }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.8rem 0 0.6rem 0;
+            color: #1c1c1e;
+            letter-spacing: -0.01em;
+        }
+        .section-title:first-of-type {
+            margin-top: 0.8rem;
+        }
+        .divider {
+            border: none;
+            border-top: 1px solid #e9edf2;
+            margin: 1.8rem 0;
+        }
+        /* ── Setting Grid ── */
+        .setting-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem 2.2rem;
+            background: #f8f9fb;
+            border-radius: 18px;
+            padding: 1.2rem 1.8rem;
+            margin: 0.6rem 0 1rem 0;
+        }
+        .setting-item {
+            display: flex;
+            align-items: baseline;
+            gap: 0.4rem;
+        }
+        .setting-item .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6f7d8c;
+            min-width: 84px;
+        }
+        .setting-item .value {
+            font-weight: 500;
+            color: #1c1c1e;
+        }
+        /* ── Note blocks ── */
+        .note-block {
+            background: #f4f7fa;
+            border-radius: 16px;
+            padding: 1.2rem 1.6rem;
+            margin: 0.8rem 0 0.2rem 0;
+            border-left: 4px solid #0071e3;
+        }
+        .note-block strong {
+            color: #0071e3;
+        }
+        .inner-signal {
+            background: #f0f3f7;
+            border-radius: 16px;
+            padding: 1.2rem 1.8rem;
+            margin: 1.2rem 0 0.8rem 0;
+            font-style: italic;
+            border-left: 4px solid #8a9aa8;
+            color: #2e3b47;
+        }
+        .difficulty {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: #e5e9f0;
+            padding: 0.2rem 1rem;
+            border-radius: 30px;
+            margin-top: 0.4rem;
+        }
+        /* ── Button ── */
+        .btn-download {
+            display: inline-block;
+            background: #0071e3;
+            color: white;
+            font-weight: 600;
+            font-size: 1.05rem;
+            padding: 0.9rem 2.8rem;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.25);
+            margin: 1.6rem 0 0.6rem 0;
+            text-decoration: none;
+        }
+        .btn-download:hover {
+            background: #005bb5;
+            transform: scale(1.01);
+        }
+        .btn-download:active {
+            transform: scale(0.97);
+        }
+        .btn-note {
+            font-size: 0.85rem;
+            color: #5e6b7a;
+            margin-top: 0.3rem;
+        }
+        /* ── Related Setups ── */
+        .related-section {
+            margin-top: 2.2rem;
+            padding-top: 1.6rem;
+            border-top: 1px solid #e2e8ef;
+        }
+        .related-section h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #3a4755;
+            margin-bottom: 0.6rem;
+        }
+        .related-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem 1.2rem;
+        }
+        .related-links a {
+            color: #0071e3;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.15s;
+        }
+        .related-links a:hover {
+            border-bottom-color: #0071e3;
+        }
+        /* ── Mobile ── */
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem 0.8rem;
+            }
+            .card {
+                padding: 1.6rem 1.2rem;
+                border-radius: 20px;
+            }
+            h1 {
+                font-size: 1.7rem;
+            }
+            .setting-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                padding: 1rem 1.2rem;
+            }
+            .setting-item .label {
+                min-width: 70px;
+            }
+            .btn-download {
+                width: 100%;
+                text-align: center;
+                padding: 0.9rem 1.2rem;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Brand Header -->
-  <div class="brand">
-    <a href="https://camerasdecoded.com">CAMERAS DECODED</a> / <a href="https://atlas.camerasdecoded.com">DECODER ATLAS</a>
-  </div>
+    <div class="card">
 
-  <!-- Navigation -->
-  <div class="nav-links">
-    <a href="index.html">🏠 Home</a>
-    <a href="cards.html">📸 Snapshot Cards</a>
-    <a href="protocols.html">📡 Protocol Library</a>
-  </div>
+        <!-- Badge -->
+        <div class="badge">Snapshot Card · Sony</div>
 
-  <!-- Hero -->
-  <div class="hero">
-    <div class="badge">⚠️ INTERMEDIATE</div>
-    <h1>Sony A7IV Portrait Low Light Settings</h1>
-    <div class="subtitle">Exact settings for Sony A7IV portrait photography in low light.</div>
-  </div>
+        <!-- Title -->
+        <h1>Sony A7IV – Portrait · Low Light</h1>
+        <div class="subhead">
+            Full Frame Mirrorless &bull; Intermediate &bull; Aperture Priority
+        </div>
 
-  <!-- Settings Block -->
-  <div class="settings-grid">
-    <span class="label">Recommended Mode</span>
-    <span class="value">Manual</span>
-    <span class="label">Shutter Speed</span>
-    <span class="value">1/125s</span>
-    <span class="label">Aperture</span>
-    <span class="value">f/1.4–f/2.0</span>
-    <span class="label">ISO</span>
-    <span class="value">Auto, cap at 6400</span>
-    <span class="label">Focus Mode</span>
-    <span class="value">Face and Eye AF</span>
-    <span class="label">Drive Mode</span>
-    <span class="value">Single Shot</span>
-    <span class="label">White Balance</span>
-    <span class="value">Tungsten</span>
-  </div>
+        <!-- Settings Grid -->
+        <div class="setting-grid">
+            <div class="setting-item"><span class="label">Mode</span><span class="value">Aperture Priority</span></div>
+            <div class="setting-item"><span class="label">Aperture</span><span class="value">f1.4 – f1.8</span></div>
+            <div class="setting-item"><span class="label">Shutter</span><span class="value">1/100s min (Auto ISO floor)</span></div>
+            <div class="setting-item"><span class="label">ISO</span><span class="value">Auto, ceiling 12800</span></div>
+            <div class="setting-item"><span class="label">Focus</span><span class="value">Face and Eye AF</span></div>
+            <div class="setting-item"><span class="label">Drive</span><span class="value">Continuous Low</span></div>
+            <div class="setting-item"><span class="label">White Balance</span><span class="value">Auto</span></div>
+            <div class="setting-item"><span class="label">Difficulty</span><span class="value"><span class="difficulty">Intermediate</span></span></div>
+        </div>
 
-  <!-- Key Setting Note -->
-  <h2>The Key Setting</h2>
-  <p>The Sony A7IV's AF Subject Shift Sensitivity is the hidden advantage here. In low light, when the camera might struggle to distinguish between the subject and the background, set AF Subject Shift Sensitivity to 1 (Locked On) — this prevents the focus from jumping to a passing element when the subject is backlit and the AF system might momentarily lose the eye against the bright sky. Enable Zebra Display set to 100+ to warn you before the rim light clips to pure white; the A7IV's dynamic range can recover highlights, but you want to avoid losing texture in the brightest areas of the subject's skin.</p>
+        <!-- Key Setting Note -->
+        <div class="section-title">⚙️ Key Setting</div>
+        <div class="note-block">
+            <strong>Shutter Speed Safety Net</strong> — The single most important setting in this scenario is your Auto ISO minimum shutter speed. Go into the camera menu, find Auto ISO, and set the minimum shutter speed to <strong>1/100s</strong>. Without it the camera will drop to 1/10s or slower in dim light and every frame will be motion blurred regardless of how steady you hold the camera. Set it once and it protects every low light shot automatically.
+        </div>
 
-  <!-- Gear -->
-  <h2>Recommended Gear</h2>
-  <p class="disclosure">*As an Amazon Associate, I earn from qualifying purchases.*</p>
-  <div class="gear-grid">
-    <div class="gear-item">
-      <a href="https://www.amazon.com/dp/B01BESR5KO?tag=camerasdeco06-20" target="_blank">Sony FE 85mm f/1.4 GM</a>
-      <div class="desc">The definitive portrait lens for the A7IV. Wide open in low light, it produces smooth bokeh and sharp, creamy skin tones.</div>
+        <!-- Focal Length & Lens Note -->
+        <div class="section-title">📷 Recommended Focal Length</div>
+        <p style="margin: 0.2rem 0 0.2rem 0;"><strong>50mm or 85mm prime</strong> at f1.4 or f1.8 — zoom lenses at f4 or f5.6 will force ISO so high that image quality degrades before the A7IV's sensor can compensate.</p>
+
+        <div class="section-title">🔍 Lens Type Note</div>
+        <p style="margin: 0.2rem 0 0.2rem 0;">Low light is where fast primes pay for themselves. If you own an f1.8 prime this is the scenario it was built for. A kit zoom in low light is an operator fighting the camera. A fast prime in low light is an operator working with it.</p>
+
+        <!-- Inner Signal -->
+        <div class="inner-signal">
+            “Low light is not a problem to solve. It is a constraint that reveals operator confidence. The photographer who configured the camera before entering the room shoots. Everyone else adjusts after the moment is gone.”
+        </div>
+
+        <!-- Download Button -->
+               <!-- Download Button -->
+        <div style="margin-top: 1.8rem;">
+            <a href="#" 
+               onclick="event.preventDefault(); 
+               localStorage.setItem('active_download', 'sony-a7iv-portrait-low-light'); 
+               setTimeout(function() { Tally.openPopup('RGa6jv'); }, 50); 
+               return false;" 
+               class="btn">📥 Download PDF</a>
+            <div class="btn-note" style="margin-top: 10px; color: #b4b4b4; font-size: 13px;">Enter your email to receive the full settings card</div>
+        </div>
+
+        <!-- Related Setups -->
+        <div class="related-section">
+            <h3>↗ Related Setups</h3>
+            <div class="related-links">
+                <a href="https://settings.camerasdecoded.com/sony-a7iv-portrait-bright-natural.html">Bright Natural</a>
+                <a href="https://settings.camerasdecoded.com/sony-a7iv-portrait-indoor-artificial.html">Indoor Artificial</a>
+                <a href="https://settings.camerasdecoded.com/sony-a7iv-portrait-golden-hour.html">Golden Hour</a>
+                <a href="https://settings.camerasdecoded.com/sony-a7iv-portrait-overcast.html">Overcast</a>
+            </div>
+        </div>
+
     </div>
-    <div class="gear-item">
-      <a href="https://www.amazon.com/dp/B09YYY6P98?tag=camerasdeco06-20" target="_blank">Sony FE 24-70mm f/2.8 GM II</a>
-      <div class="desc">A versatile zoom for indoor portrait sessions. The constant f/2.8 aperture handles low artificial light well, and the zoom range lets you compose environmental portraits or tight headshots without swapping lenses.</div>
-    </div>
-  </div>
 
-  <!-- Inner Signal -->
-  <div class="inner-signal">
-    <p>“The A7IV's AF sees faces in near darkness. Trust the eye detection. The camera will find the face. You find the moment.”</p>
-    <p class="attribution">— Cynetis‑7</p>
-  </div>
+    <!-- ─── TALLY POPUP SCRIPT ─── -->
+    <script>
+        (function() {
+            // Tally Form ID (same as your working form)
+            const FORM_ID = 'RGa6jv';
 
-  <!-- Snapshot Card Download -->
-  <div class="cta-box" style="border-color:#0FFF50;">
-    <p style="color:#FFF; font-family:'Space Mono',monospace; font-size:16px;">📸 Snapshot Card</p>
-    <p style="color:#888; font-size:14px;">Save this setup as a printable one‑page reference card.</p>
-    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
-      <a href="cards/sony-a7iv-portrait-low-light-card.png" class="btn" target="_blank">🖼️ View PNG</a>
-      <a href="cards/sony-a7iv-portrait-low-light-card.pdf" class="btn" target="_blank">📥 Download PDF</a>
-    </div>
-  </div>
+            // Find the download button
+            const btn = document.getElementById('downloadPdfBtn');
+            if (!btn) return;
 
-  <!-- Related -->
-  <h2>Related Setups</h2>
-  <div class="related-grid">
-    <div class="related-item"><a href="sony-a7iv-event-indoor-artificial.html">Sony A7IV Event Indoor Artificial</a></div>
-    <div class="related-item"><a href="sony-a7iv-sports-low-light.html">Sony A7IV Sports Low Light</a></div>
-    <div class="related-item"><a href="canon-r6-markii-portrait-low-light.html">Canon R6 II Portrait Low Light</a></div>
-  </div>
+            // Attach click handler
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
 
-  <!-- Guide CTA -->
-  <div class="cta-box">
-    <p style="color:#FFF; font-family:'Space Mono',monospace; font-size:16px;">📘 Portrait Operator’s Guide</p>
-    <p style="color:#888; font-size:14px;">Master portrait photography with this focused guide — $37.</p>
-    <a href="https://cameradecoded.gumroad.com/l/TheCameraConfidenceGuide?utm_campaign=founding-200-link&utm_content=website&utm_medium=website&utm_source=settings-pages&utm_term=learn-photography-videography-basics-beginner-easy-guide-tutorials-cheat-sheet-masterclass-cameras-camera-mirrorlesscamera-mirrorless-howto-how-to-help-manual-mastery-educational-education-lesson-pdf" class="btn">Get the Guide →</a>
-  </div>
+                // Open Tally popup
+                if (typeof Tally !== 'undefined' && Tally.openPopup) {
+                    Tally.openPopup(FORM_ID);
+                } else {
+                    // Fallback if Tally script hasn't loaded
+                    window.open('https://tally.so/r/' + FORM_ID, '_blank');
+                }
+            });
 
-  <!-- Newsletter CTA -->
-  <div class="cta-box" style="border-color:#333;">
-    <p style="color:#FFF; font-family:'Space Mono',monospace; font-size:14px;">📡 Join the Signal</p>
-    <p style="color:#888; font-size:13px;">Free weekly protocols in your inbox. No fluff. Just the signal.</p>
-    <a href="#" class="btn">Subscribe Free →</a>
-  </div>
+        })();
+    </script>
 
-  <!-- Footer -->
-  <div class="footer">
-    <a href="https://camerasdecoded.com">camerasdecoded.com</a> · 
-    <a href="https://atlas.camerasdecoded.com">atlas.camerasdecoded.com</a><br>
-    © Cameras Decoded — Operator Confidence Curriculum
-  </div>
-
-  <!-- ============================================ -->
-  <!-- Cynetis‑7 Transmission Overlay                -->
-  <!-- ============================================ -->
-  <div id="cynetis-transmission">
-    <div class="transmission-container">
-      <div class="orb-container">
-        <!-- Cynetis‑7 Orb Image -->
-        <img src="assets/cynetis-orb.png" alt="Cynetis-7" class="orb-pulse" onerror="this.style.display='none'; document.querySelector('.orb-container').innerHTML='<div style=\'font-family:Space Mono,monospace;color:#0FFF50;font-size:60px;\'>◉</div>'">
-      </div>
-      <div class="transmission-text">
-        <span id="typing-text"></span>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const overlay = document.getElementById('cynetis-transmission');
-      const typingElement = document.getElementById('typing-text');
-
-      // --- Check if the orb image exists ---
-      const orbImg = document.querySelector('.orb-pulse');
-      if (orbImg) {
-        orbImg.onerror = function() {
-          this.style.display = 'none';
-          document.querySelector('.orb-container').innerHTML = '<div style="font-family:Space Mono,monospace;color:#0FFF50;font-size:60px;">◉</div>';
-        };
-      }
-
-      // --- Transmission messages ---
-      const messages = [
-        "Cynetis‑7 is decoding the signal...",
-        "Protocol retrieved. Transmitting..."
-      ];
-
-      let messageIndex = 0;
-      let charIndex = 0;
-      let speed = 50;
-      let isComplete = false;
-
-      function typeEffect() {
-        if (isComplete) return;
-
-        const currentMessage = messages[messageIndex];
-        if (charIndex < currentMessage.length) {
-          typingElement.textContent = currentMessage.substring(0, charIndex + 1);
-          charIndex++;
-          setTimeout(typeEffect, speed);
-        } else {
-          // Move to next message
-          if (messageIndex < messages.length - 1) {
-            messageIndex++;
-            charIndex = 0;
-            // Clear and start next message
-            typingElement.textContent = '';
-            setTimeout(typeEffect, 300);
-          } else {
-            // All messages done — fade out overlay
-            isComplete = true;
-            setTimeout(function() {
-              overlay.style.opacity = '0';
-              setTimeout(function() {
-                overlay.style.display = 'none';
-              }, 800);
-            }, 600);
-          }
-        }
-      }
-
-      // Start the transmission
-      setTimeout(typeEffect, 300);
-    });
-  </script>
+    <!-- Tally embed script (loads the popup functionality) -->
+    <script async src="https://tally.so/widgets/embed.js"></script>
 
 </body>
 </html>
