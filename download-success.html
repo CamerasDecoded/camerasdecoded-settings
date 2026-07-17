@@ -1,8 +1,31 @@
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // 1. Pull the camera key straight out of the local browser storage
-    const cardKey = localStorage.getItem('active_download');
-    const btn = document.getElementById('downloadBtn');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download Ready — Decoder Atlas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .success-box { text-align: center; padding: 60px 20px; max-width: 600px; margin: 0 auto; }
+    .success-box h1 { color: #8deb00; font-family: 'Space Mono', monospace; font-size: 28px; margin-bottom: 10px; }
+    .success-box h2 { color: #ffffff; font-size: 16px; font-weight: 400; margin-bottom: 10px; }
+    .success-box p { color: #b4b4b4; font-size: 14px; }
+    #downloadBtn { display: inline-block; margin-top: 30px; padding: 14px 40px; border: 1px solid #8deb00; color: #8deb00; background: transparent; border-radius: 30px; text-decoration: none; font-family: 'Space Mono', monospace; font-size: 14px; transition: 0.2s; cursor: pointer; }
+    #downloadBtn:hover { background: #8deb00; color: #000; }
+  </style>
+</head>
+<body>
+<div class="main-wrapper" style="display:flex; align-items:center; min-height:80vh;">
+  <div class="success-box">
+    <h1>📡 Signal Received.</h1>
+    <h2 id="cameraLabel">Your download is starting...</h2>
+    <p style="margin-top:10px;">If the download doesn't start automatically, click the button below.</p>
+    
+    <!-- The Button (still here for fallback, but script will auto-click it) -->
+    <a id="downloadBtn" href="#" onclick="return false;">⬇️ Download Your PDF</a>
+  </div>
+</div>
 
       // --- MASTER ASSET MAP (Using raw GitHub URLs) ---
             const pdfMap = {
@@ -107,8 +130,6 @@
       const pdfUrl = pdfMap[cardKey.toLowerCase().trim()];
 
       if (pdfUrl) {
-        if (btn) btn.innerText = '⬇️ Download Your PDF';
-
         const executeDownload = () => {
           const link = document.createElement('a');
           link.href = pdfUrl;
@@ -116,20 +137,29 @@
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          
-          // Clear memory after download so it doesn't interfere with the next user
           localStorage.removeItem('active_download');
         };
 
-        setTimeout(executeDownload, 1500); // Auto-download
-        if (btn) btn.onclick = (e) => { e.preventDefault(); executeDownload(); };
+        // Auto-download after 1.5 seconds
+        setTimeout(executeDownload, 1500); 
+        
+        // Also attach to the fallback button
+        const btn = document.getElementById('downloadBtn');
+        if (btn) {
+          btn.innerText = '⬇️ Download Your PDF';
+          btn.onclick = (e) => { e.preventDefault(); executeDownload(); };
+        }
       } else {
+        console.warn("No asset configured for key: " + cardKey);
+        const btn = document.getElementById('downloadBtn');
         if (btn) {
           btn.innerText = 'Return to Atlas';
           btn.onclick = () => { window.location.href = 'index.html'; };
         }
       }
     } else {
+      console.warn("No 'active_download' found in LocalStorage.");
+      const btn = document.getElementById('downloadBtn');
       if (btn) {
         btn.innerText = 'Return to Atlas';
         btn.onclick = () => { window.location.href = 'index.html'; };
@@ -137,3 +167,6 @@
     }
   });
 </script>
+
+</body>
+</html>
