@@ -1,214 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sony A7IV – Portrait · Low Light | Cameras Decoded</title>
-    <style>
-        /* ── Reset & Base ── */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #f6f6f8;
-            color: #1c1c1e;
-            line-height: 1.6;
-            padding: 2rem 1.5rem;
-        }
-        .card {
-            max-width: 820px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 28px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-            padding: 2.5rem 2.8rem;
-        }
-        /* ── Typography ── */
-        .badge {
-            display: inline-block;
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            background: #eaeef2;
-            color: #2c3e50;
-            padding: 0.2rem 0.8rem;
-            border-radius: 30px;
-            margin-bottom: 0.8rem;
-        }
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            line-height: 1.2;
-            margin-bottom: 0.25rem;
-        }
-        .subhead {
-            font-size: 1.1rem;
-            color: #5e6b7a;
-            margin-bottom: 1.8rem;
-            border-left: 4px solid #d0d7dd;
-            padding-left: 1rem;
-        }
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin: 1.8rem 0 0.6rem 0;
-            color: #1c1c1e;
-            letter-spacing: -0.01em;
-        }
-        .section-title:first-of-type {
-            margin-top: 0.8rem;
-        }
-        .divider {
-            border: none;
-            border-top: 1px solid #e9edf2;
-            margin: 1.8rem 0;
-        }
-        /* ── Setting Grid ── */
-        .setting-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.8rem 2.2rem;
-            background: #f8f9fb;
-            border-radius: 18px;
-            padding: 1.2rem 1.8rem;
-            margin: 0.6rem 0 1rem 0;
-        }
-        .setting-item {
-            display: flex;
-            align-items: baseline;
-            gap: 0.4rem;
-        }
-        .setting-item .label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: #6f7d8c;
-            min-width: 84px;
-        }
-        .setting-item .value {
-            font-weight: 500;
-            color: #1c1c1e;
-        }
-        /* ── Note blocks ── */
-        .note-block {
-            background: #f4f7fa;
-            border-radius: 16px;
-            padding: 1.2rem 1.6rem;
-            margin: 0.8rem 0 0.2rem 0;
-            border-left: 4px solid #0071e3;
-        }
-        .note-block strong {
-            color: #0071e3;
-        }
-        .inner-signal {
-            background: #f0f3f7;
-            border-radius: 16px;
-            padding: 1.2rem 1.8rem;
-            margin: 1.2rem 0 0.8rem 0;
-            font-style: italic;
-            border-left: 4px solid #8a9aa8;
-            color: #2e3b47;
-        }
-        .difficulty {
-            display: inline-block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            background: #e5e9f0;
-            padding: 0.2rem 1rem;
-            border-radius: 30px;
-            margin-top: 0.4rem;
-        }
-        /* ── Button ── */
-        .btn-download {
-            display: inline-block;
-            background: #0071e3;
-            color: white;
-            font-weight: 600;
-            font-size: 1.05rem;
-            padding: 0.9rem 2.8rem;
-            border: none;
-            border-radius: 60px;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.25);
-            margin: 1.6rem 0 0.6rem 0;
-            text-decoration: none;
-        }
-        .btn-download:hover {
-            background: #005bb5;
-            transform: scale(1.01);
-        }
-        .btn-download:active {
-            transform: scale(0.97);
-        }
-        .btn-note {
-            font-size: 0.85rem;
-            color: #5e6b7a;
-            margin-top: 0.3rem;
-        }
-        /* ── Related Setups ── */
-        .related-section {
-            margin-top: 2.2rem;
-            padding-top: 1.6rem;
-            border-top: 1px solid #e2e8ef;
-        }
-        .related-section h3 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #3a4755;
-            margin-bottom: 0.6rem;
-        }
-        .related-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.6rem 1.2rem;
-        }
-        .related-links a {
-            color: #0071e3;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9rem;
-            border-bottom: 1px solid transparent;
-            transition: border-color 0.15s;
-        }
-        .related-links a:hover {
-            border-bottom-color: #0071e3;
-        }
-        /* ── Mobile ── */
-        @media (max-width: 600px) {
-            body {
-                padding: 1rem 0.8rem;
-            }
-            .card {
-                padding: 1.6rem 1.2rem;
-                border-radius: 20px;
-            }
-            h1 {
-                font-size: 1.7rem;
-            }
-            .setting-grid {
-                grid-template-columns: 1fr;
-                gap: 0.5rem;
-                padding: 1rem 1.2rem;
-            }
-            .setting-item .label {
-                min-width: 70px;
-            }
-            .btn-download {
-                width: 100%;
-                text-align: center;
-                padding: 0.9rem 1.2rem;
-            }
-        }
-    </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Sony A7IV Portrait Bright Natural Settings",
+    "description": "Exact camera settings for Sony A7IV portrait photography in bright natural light. Mode: Aperture Priority, Shutter: 1/500s, Aperture: f/1.4–f/2.0, ISO: Auto cap 800.",
+    "author": { "@type": "Person", "name": "The Signal Keeper" },
+    "publisher": { "@type": "Organization", "name": "Cameras Decoded", "url": "https://camerasdecoded.com" },
+    "datePublished": "2026-07-06",
+    "dateModified": "2026-07-06"
+  }
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sony A7IV Portrait Bright Natural Settings — Decoder Atlas</title>
+  <meta name="description" content="Exact camera settings for Sony A7IV portrait photography in bright natural light. Mode: Aperture Priority, Shutter: 1/500s, Aperture: f/1.4–f/2.0, ISO: Auto cap 800.">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
