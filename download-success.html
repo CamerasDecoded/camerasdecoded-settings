@@ -27,8 +27,14 @@
   </div>
 </div>
 
+      <!-- AUTOMATIC PDF DOWNLOAD ENGINE -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const cardKey = localStorage.getItem('active_download');
+
+    if (cardKey) {
       // --- MASTER ASSET MAP (Using raw GitHub URLs) ---
-            const pdfMap = {
+      const pdfMap = {
         "canon-eos-r50-event-bright-natural": "https://raw.githubusercontent.com/CamerasDecoded/camerasdecoded-settings/main/cards/canon-eos-r50-event-bright-natural-card.pdf",
         "canon-eos-r50-event-golden-hour": "https://raw.githubusercontent.com/CamerasDecoded/camerasdecoded-settings/main/cards/canon-eos-r50-event-golden-hour-card.pdf",
         "canon-eos-r50-event-indoor-artificial": "https://raw.githubusercontent.com/CamerasDecoded/camerasdecoded-settings/main/cards/canon-eos-r50-event-indoor-artificial-card.pdf",
@@ -143,7 +149,7 @@
         // Auto-download after 1.5 seconds
         setTimeout(executeDownload, 1500); 
         
-        // Also attach to the fallback button
+        // Attach to the fallback button
         const btn = document.getElementById('downloadBtn');
         if (btn) {
           btn.innerText = '⬇️ Download Your PDF';
