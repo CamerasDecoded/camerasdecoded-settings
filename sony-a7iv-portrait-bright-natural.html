@@ -160,11 +160,21 @@
   });
 </script>
 
-<!-- NEW MASTER SCRIPT STARTS HERE -->
+<!-- CYNETIS-7 TRANSMISSION SCRIPT -->
 <script>
-  // --- THE MASTER ASSET MAP (Add your cards here) ---
+  document.addEventListener('DOMContentLoaded', function() {
+    // ... (your existing Cynetis-7 code) ...
+    setTimeout(typeEffect, 300);
+  });
+</script>
+
+<!-- ========================================================== -->
+<!-- PASTE THE NEW MASTER SCRIPT RIGHT HERE -->
+<!-- ========================================================== -->
+<script>
+  // --- THE MASTER ASSET MAP ---
   const pdfAssetMap = {
-    "/sony-a7iv-portrait-bright-natural": "cards/sony-a7iv-portrait-bright-natural-card.pdf"
+    "/sony-a7iv-portrait-bright-natural": "https://raw.githubusercontent.com/CamerasDecoded/camerasdecoded-settings/main/cards/sony-a7iv-portrait-bright-natural-card.pdf"
   };
 
   // --- LISTEN FOR TALLY SUBMISSIONS ---
@@ -176,7 +186,8 @@
 
         const pageField = fields.find(field => field.name === 'originPage');
         if (pageField && pageField.value) {
-          let detectedPath = pageField.value;
+          let detectedPath = pageField.value.toLowerCase(); 
+
           if (detectedPath.includes('://')) {
             try {
               detectedPath = new URL(detectedPath).pathname;
@@ -187,9 +198,18 @@
           if (detectedPath.endsWith('/') && detectedPath.length > 1) {
             detectedPath = detectedPath.slice(0, -1);
           }
+          
           const finalDownloadUrl = pdfAssetMap[detectedPath];
+          
           if (finalDownloadUrl) {
-            window.open(finalDownloadUrl, '_blank');
+            // THE POP-UP BYPASS
+            const downloadLink = document.createElement('a');
+            downloadLink.href = finalDownloadUrl;
+            downloadLink.target = '_blank';
+            downloadLink.download = finalDownloadUrl.split('/').pop(); 
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
           } else {
             console.warn("No PDF configured for URL path: " + detectedPath);
           }
@@ -200,7 +220,7 @@
     }
   });
 </script>
-<!-- NEW MASTER SCRIPT ENDS HERE -->
 
+<!-- THIS IS THE ABSOLUTE LAST LINE OF YOUR FILE -->
 </body>
 </html>
