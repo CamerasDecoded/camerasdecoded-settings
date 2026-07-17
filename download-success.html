@@ -1,11 +1,8 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    let cardKey = urlParams.get('card');
+    // 1. Pull the camera key straight out of the local browser storage
+    const cardKey = localStorage.getItem('active_download');
     const btn = document.getElementById('downloadBtn');
-
-    if (cardKey) {
-      cardKey = cardKey.toLowerCase().trim();
 
       // --- MASTER ASSET MAP (Using raw GitHub URLs) ---
             const pdfMap = {
@@ -107,7 +104,7 @@
         "sony-a7iv-sports-overcast": "https://raw.githubusercontent.com/CamerasDecoded/camerasdecoded-settings/main/cards/sony-a7iv-sports-overcast-card.pdf"
       };
 
-      const pdfUrl = pdfMap[cardKey];
+      const pdfUrl = pdfMap[cardKey.toLowerCase().trim()];
 
       if (pdfUrl) {
         if (btn) btn.innerText = '⬇️ Download Your PDF';
@@ -119,6 +116,9 @@
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
+          
+          // Clear memory after download so it doesn't interfere with the next user
+          localStorage.removeItem('active_download');
         };
 
         setTimeout(executeDownload, 1500); // Auto-download
@@ -128,7 +128,6 @@
           btn.innerText = 'Return to Atlas';
           btn.onclick = () => { window.location.href = 'index.html'; };
         }
-        console.warn("No asset for key: " + cardKey);
       }
     } else {
       if (btn) {
