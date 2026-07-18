@@ -447,7 +447,17 @@
 
     renderArticles(articles);
   </script>
-
+<!-- Step 2: Capture operator token from URL -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('opToken');
+    if (token) {
+      // Lock the token into the browser memory for this subdomain session
+      localStorage.setItem('operator_uid', token);
+    }
+  });
+</script>
 </body>
   <!-- Force rebuild -->
 </html>
