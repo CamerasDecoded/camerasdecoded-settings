@@ -54,7 +54,10 @@
     const db = firebase.firestore();
 
     const savedUid = localStorage.getItem('operator_uid');
+    console.log("Checking UID from localStorage:", savedUid);
+
     if (!savedUid) {
+      console.warn("No UID found! Redirecting to Atlas.");
       window.location.href = 'index.html';
       return;
     }
@@ -62,7 +65,11 @@
     db.collection('users').doc(savedUid).get().then((doc) => {
       if (doc.exists) {
         const data = doc.data();
+        console.log("Firestore document data found:", data);
+        
         const savedIds = data.savedCards || [];
+        console.log("Saved Cards Array length:", savedIds.length);
+
         const grid = document.getElementById('collectionGrid');
 
         if (savedIds.length === 0) {
@@ -70,11 +77,9 @@
           return;
         }
 
-        // Loop through the saved IDs and create cards
         savedIds.forEach(id => {
           const card = document.createElement('div');
           card.className = 'collection-card';
-          // Convert ID to a readable title (e.g., "sony-a7iv-portrait-bright-natural" → "Sony A7IV Portrait Bright Natural")
           const displayName = id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
           
           card.innerHTML = `
@@ -85,6 +90,9 @@
           `;
           grid.appendChild(card);
         });
+      } else {
+        console.warn("Document does not exist in Firestore for UID:", savedUid);
+        document.getElementById('collectionGrid').innerHTML = '<div class="empty-state">Account not found. Please log in again.</div>';
       }
     }).catch((err) => {
       console.error("Error loading collection:", err);
