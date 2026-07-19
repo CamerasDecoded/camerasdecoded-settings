@@ -239,11 +239,17 @@
   };
   firebase.initializeApp(firebaseConfig);
 
-  // --- THE SAVE FUNCTION ---
+  <script>
+  // ... (keep the Firebase initialization at the top) ...
+
+  // --- THE UPDATED SAVE FUNCTION WITH LOGIN CHECK ---
   const saveCardToCollection = (cardId) => {
     const savedUid = localStorage.getItem('operator_uid');
+    
+    // If they aren't logged in, tell them exactly where to go
     if (!savedUid) {
-      alert("Please log in to the Operator Dashboard to save cards to your collection.");
+      alert("Please log in to the Operator Dashboard to save cards to your collection. You will be redirected.");
+      window.location.href = "https://camerasdecoded.com/login.html"; 
       return;
     }
 
