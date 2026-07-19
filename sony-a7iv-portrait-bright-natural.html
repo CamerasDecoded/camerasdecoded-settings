@@ -222,17 +222,31 @@
   });
 </script>
 
+<!-- FIREBASE SDK FOR SETTINGS SUBDOMAIN -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <script>
+  // Initialize Firebase exactly like the main site
+  const firebaseConfig = {
+    apiKey: "AIzaSyB95Vx0i8W6WNfUy1N4TNQyfN5xCxQYnz8",
+    authDomain: "cameras-decoded.firebaseapp.com",
+    projectId: "cameras-decoded",
+    storageBucket: "cameras-decoded.firebasestorage.app",
+    messagingSenderId: "1088920052790",
+    appId: "1:1088920052790:web:2177c1fb31109c1fa02497",
+    measurementId: "G-YN3M01WW0B"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  // --- THE SAVE FUNCTION ---
   const saveCardToCollection = (cardId) => {
-    // 1. Read the securely passed operator ID from browser memory
     const savedUid = localStorage.getItem('operator_uid');
-    
     if (!savedUid) {
       alert("Please log in to the Operator Dashboard to save cards to your collection.");
       return;
     }
 
-    // 2. Access the database using the absolute document reference path
     const db = firebase.firestore();
     const userRef = db.collection('users').doc(savedUid);
     
@@ -241,12 +255,13 @@
     }).then(() => {
       alert("Card saved to your collection!");
     }).catch((err) => {
-      // If the array doesn't exist yet, create it
       userRef.set({ savedCards: [cardId] }, { merge: true })
         .then(() => alert("Card saved to your collection!"))
         .catch(e => console.error("Error saving card:", e));
     });
   }
 </script>
+
+</body>
 </body>
 </html>
