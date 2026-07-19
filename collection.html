@@ -53,23 +53,22 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // 1. Grab the UID from localStorage
     const savedUid = localStorage.getItem('operator_uid');
-    console.log("Checking UID from localStorage:", savedUid);
+    
+    // 2. CRITICAL FIX: Strip anything after / or ? to clean the UID
+    const cleanUid = savedUid ? savedUid.split(/[\/?#]/)[0] : null;
 
-    if (!savedUid) {
+    if (!cleanUid) {
       console.warn("No UID found! Redirecting to Atlas.");
       window.location.href = 'index.html';
       return;
     }
 
-    db.collection('users').doc(savedUid).get().then((doc) => {
+    db.collection('users').doc(cleanUid).get().then((doc) => {
       if (doc.exists) {
         const data = doc.data();
-        console.log("Firestore document data found:", data);
-        
         const savedIds = data.savedCards || [];
-        console.log("Saved Cards Array length:", savedIds.length);
-
         const grid = document.getElementById('collectionGrid');
 
         if (savedIds.length === 0) {
@@ -91,11 +90,12 @@
           grid.appendChild(card);
         });
       } else {
-        console.warn("Document does not exist in Firestore for UID:", savedUid);
+        console.warn("Document does not exist in Firestore for UID:", cleanUid);
         document.getElementById('collectionGrid').innerHTML = '<div class="empty-state">Account not found. Please log in again.</div>';
       }
     }).catch((err) => {
       console.error("Error loading collection:", err);
+      document.getElementById('collectionGrid').innerHTML = '<div class="empty-state">Error loading your collection. Please try again.</div>';
     });
   });
 </script>
