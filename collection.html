@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Collection — Decoder Atlas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .collection-header { text-align: center; padding: 40px 20px; border-bottom: 1px solid #1A1A1A; margin-bottom: 30px; }
+    .collection-header h1 { color: #8deb00; font-family: 'Space Mono', monospace; font-size: 32px; }
+    .collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .collection-card {
+      background: #0A0A0A; border: 1px solid #1A1A1A; border-radius: 8px; padding: 20px;
+      transition: 0.2s; text-align: center;
+    }
+    .collection-card:hover { border-color: #8deb00; transform: translateY(-2px); }
+    .collection-card a { text-decoration: none; color: #ffffff; display: block; }
+    .collection-card .camera { color: #8deb00; font-family: 'Space Mono', monospace; font-size: 14px; margin-top: 10px; }
+    .back-link { display: block; text-align: center; margin-top: 40px; color: #b4b4b4; text-decoration: none; font-size: 14px; }
+    .back-link:hover { color: #8deb00; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #b4b4b4; }
+  </style>
+</head>
+<body>
+<div class="main-wrapper">
+  <div class="collection-header">
+    <h1>🗂️ My Collection</h1>
+    <p style="color:#b4b4b4;">Cards you have saved from the Decoder Atlas.</p>
+  </div>
+
+  <div id="collectionGrid" class="collection-grid">
+    <!-- Cards will be loaded here by JavaScript -->
+  </div>
+
+  <a href="index.html" class="back-link">← Return to Atlas</a>
+</div>
+
+<!-- FIREBASE SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const firebaseConfig = {
+      apiKey: "AIzaSyB95Vx0i8W6WNfUy1N4TNQyfN5xCxQYnz8",
+      authDomain: "cameras-decoded.firebaseapp.com",
+      projectId: "cameras-decoded",
+      storageBucket: "cameras-decoded.firebasestorage.app",
+      messagingSenderId: "1088920052790",
+      appId: "1:1088920052790:web:2177c1fb31109c1fa02497",
+      measurementId: "G-YN3M01WW0B"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const savedUid = localStorage.getItem('operator_uid');
+    if (!savedUid) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    db.collection('users').doc(savedUid).get().then((doc) => {
+      if (doc.exists) {
+        const data = doc.data();
+        const savedIds = data.savedCards || [];
+        const grid = document.getElementById('collectionGrid');
+
+        if (savedIds.length === 0) {
+          grid.innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
+          return;
+        }
+
+        // Loop through the saved IDs and create cards
+        savedIds.forEach(id => {
+          const card = document.createElement('div');
+          card.className = 'collection-card';
+          // Convert ID to a readable title (e.g., "sony-a7iv-portrait-bright-natural" → "Sony A7IV Portrait Bright Natural")
+          const displayName = id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          
+          card.innerHTML = `
+            <a href="${id}.html">
+              <div style="font-size: 48px; margin-bottom: 10px;">📸</div>
+              <div class="camera">${displayName}</div>
+            </a>
+          `;
+          grid.appendChild(card);
+        });
+      }
+    }).catch((err) => {
+      console.error("Error loading collection:", err);
+    });
+  });
+</script>
+</body>
+</html>
