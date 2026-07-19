@@ -82,6 +82,7 @@
       
 <!-- Direct Link Method (Guaranteed to work) -->
 <a href="#" onclick="event.preventDefault(); localStorage.setItem('active_download', 'sony-a7iv-portrait-bright-natural'); Tally.openPopup('RGa6jv'); return false;" class="btn">📥 Download PDF</a>
+<a href="#" onclick="saveCardToCollection('sony-a7iv-portrait-bright-natural')" class="btn" style="margin-left: 10px;">⭐ Save to Collection</a>
     </div>
   </div>
 
@@ -221,6 +222,31 @@
   });
 </script>
 
-<!-- THIS IS THE ABSOLUTE LAST LINE OF YOUR FILE -->
+<script>
+  const saveCardToCollection = (cardId) => {
+    // 1. Read the securely passed operator ID from browser memory
+    const savedUid = localStorage.getItem('operator_uid');
+    
+    if (!savedUid) {
+      alert("Please log in to the Operator Dashboard to save cards to your collection.");
+      return;
+    }
+
+    // 2. Access the database using the absolute document reference path
+    const db = firebase.firestore();
+    const userRef = db.collection('users').doc(savedUid);
+    
+    userRef.update({
+      savedCards: firebase.firestore.FieldValue.arrayUnion(cardId)
+    }).then(() => {
+      alert("Card saved to your collection!");
+    }).catch((err) => {
+      // If the array doesn't exist yet, create it
+      userRef.set({ savedCards: [cardId] }, { merge: true })
+        .then(() => alert("Card saved to your collection!"))
+        .catch(e => console.error("Error saving card:", e));
+    });
+  }
+</script>
 </body>
 </html>
