@@ -222,52 +222,87 @@
   });
 </script>
 
-<!-- FIREBASE SDK FOR SETTINGS SUBDOMAIN -->
+<!-- ========================================================== -->
+<!-- PASTE THE NEW MASTER SCRIPT RIGHT HERE -->
+<!-- ========================================================== -->
+<!-- FIREBASE COMPAT SDK LINKS -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://gstatic.com"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // Initialize Firebase exactly like the main site
+  // --- THE MASTER ASSET MAP ---
+  const pdfAssetMap = {
+    "/sony-a7iv-portrait-bright-natural": "https://raw.githubusercontent.com/CamerasDecoded/camerasdecoded-settings/main/cards/sony-a7iv-portrait-bright-natural-card.pdf"
+  };
+
+  // --- LISTEN FOR TALLY SUBMISSIONS ---
+  window.addEventListener('message', (e) => {
+    if (e && e.data && typeof e.data === 'string' && e.data.includes('Tally.FormSubmitted')) {
+      try {
+        const payload = JSON.parse(e.data);
+        const fields = payload.data.fields;
+        const pageField = fields.find(field => field.name === 'originPage');
+        if (pageField && pageField.value) {
+          let detectedPath = pageField.value.toLowerCase(); 
+          if (detectedPath.includes('://')) {
+            try { detectedPath = new URL(detectedPath).pathname; } catch (urlErr) { detectedPath = '/' + detectedPath.split('.com/')[1]; }
+          }
+          if (detectedPath.endsWith('/') && detectedPath.length > 1) { detectedPath = detectedPath.slice(0, -1); }
+          const finalDownloadUrl = pdfAssetMap[detectedPath];
+          if (finalDownloadUrl) {
+            const downloadLink = document.createElement('a');
+            downloadLink.href = finalDownloadUrl;
+            downloadLink.target = '_blank';
+            downloadLink.download = finalDownloadUrl.split('/').pop(); 
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+          }
+        }
+      } catch (error) { console.error("Error parsing Tally submission:", error); }
+    }
+  });
+
+  // --- INITIALIZE FIREBASE CONFIG ---
   const firebaseConfig = {
     apiKey: "AIzaSyB95Vx0i8W6WNfUy1N4TNQyfN5xCxQYnz8",
-    authDomain: "cameras-decoded.firebaseapp.com",
+    authDomain: "://firebaseapp.com",
     projectId: "cameras-decoded",
     storageBucket: "cameras-decoded.firebasestorage.app",
     messagingSenderId: "1088920052790",
     appId: "1:1088920052790:web:2177c1fb31109c1fa02497",
     measurementId: "G-YN3M01WW0B"
   };
+  
   firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-  <script>
-  // ... (keep the Firebase initialization at the top) ...
-
-  // --- THE UPDATED SAVE FUNCTION WITH LOGIN CHECK ---
+  // --- THE FIXED SAVE FUNCTION ---
   const saveCardToCollection = (cardId) => {
-    const savedUid = localStorage.getItem('operator_uid');
+    const savedUid = localStorage.getItem('cameras_decoded_uid');
     
-    // If they aren't logged in, tell them exactly where to go
     if (!savedUid) {
-      alert("Please log in to the Operator Dashboard to save cards to your collection. You will be redirected.");
-      window.location.href = "https://camerasdecoded.com/login.html"; 
+      alert("Please log in to your Cameras Decoded account to save cards to your collection. Redirecting...");
+      window.location.href = "https://camerasdecoded.com" + encodeURIComponent(window.location.href); 
       return;
     }
 
-    const db = firebase.firestore();
     const userRef = db.collection('users').doc(savedUid);
     
     userRef.update({
-      savedCards: firebase.firestore.FieldValue.arrayUnion(cardId)
+      saved_cards: firebase.firestore.FieldValue.arrayUnion(cardId)
     }).then(() => {
-      alert("Card saved to your collection!");
+      alert("Card saved to your collection successfully!");
     }).catch((err) => {
-      userRef.set({ savedCards: [cardId] }, { merge: true })
+      userRef.set({ 
+        saved_cards: [cardId],
+        role: 'Operator'
+      }, { merge: true })
         .then(() => alert("Card saved to your collection!"))
         .catch(e => console.error("Error saving card:", e));
     });
-  }
+  };
 </script>
-
-</body>
 </body>
 </html>
