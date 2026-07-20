@@ -49,9 +49,9 @@
   </div>
 </div>
 
-<!-- FIXED CORE FIREBASE UTILITY LIBRARIES -->
+<!-- FIREBASE UTILITY LIBRARIES -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://gstatic.com"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
@@ -103,8 +103,7 @@
 
       if (doc.exists) {
         const data = doc.data();
-        // FIXED: Maps to standard 'saved_cards' underscore key structure
-        const savedIds = data.saved_cards || [];
+        const savedIds = data.savedCards || [];
 
         if (savedIds.length === 0) {
           grid.innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
@@ -143,9 +142,9 @@
       return;
     }
 
-    // Atomic remove execution to drop just this targeted text item sequence from the array field
+    // Atomically removes just this one entry from the array field
     db.collection('users').doc(uid).update({
-      saved_cards: firebase.firestore.FieldValue.arrayRemove(cardId)
+      savedCards: firebase.firestore.FieldValue.arrayRemove(cardId)
     })
     .then(() => {
       // Success: Animation removal sweep execution from user display view elements
