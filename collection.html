@@ -70,21 +70,28 @@
     
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
+    const auth = firebase.auth();
 
-    // 1. FIXED: Pointed key value reference directly to 'cameras_decoded_uid'
-    const savedUid = localStorage.getItem('cameras_decoded_uid');
-    
-    // 2. Clear out formatting tails or tracking parameter text chunks securely
-    const cleanUid = savedUid ? savedUid.split(/[\/?#]/)[0] : null;
-
-    if (!cleanUid) {
-      console.warn("No authorized UID token found. Returning to base index view.");
-      document.getElementById('collectionGrid').innerHTML = '<div class="empty-state">Access denied. Please log in through the main site to view your collection.</div>';
-      return;
+    // ==========================================================
+  // FIXED CROSS-SUBDOMAIN FIREBASE AUTH REPLACEMENT LOOP
+  // ==========================================================
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      console.log("Secure subdomain session verified for UID:", user.uid);
+      
+      // Maintain local variables for your fallback scripts
+      localStorage.setItem('cameras_decoded_uid', user.uid);
+      
+      // Fire your loop engine to pull your user data records out of Firestore
+      loadUserCollectionGrid(user.uid);
+    } else {
+      console.warn("No active user session detected on this origin.");
+      localStorage.removeItem('cameras_decoded_uid');
+      
+      // Update UI container box immediately with your empty state block
+      document.getElementById('collectionGrid').innerHTML = 
+        '<div class="empty-state">Access denied. Please log in through the main site to view your collection.</div>';
     }
-
-    // Load active card values out of database arrays
-    loadUserCollectionGrid(cleanUid);
   });
 
   // --- RENDERING LOOP ENGINE ---
