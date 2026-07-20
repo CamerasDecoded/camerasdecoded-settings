@@ -279,7 +279,7 @@
   const db = firebase.firestore();
 
   // --- THE FIXED SAVE FUNCTION ---
-  const saveCardToCollection = (cardId) => {
+  function saveCardToCollection = (cardId) => {
     const savedUid = localStorage.getItem('cameras_decoded_uid');
     
     if (!savedUid) {
