@@ -280,21 +280,32 @@
   function performSave(cardId, uid) {
     const userRef = db.collection('users').doc(uid);
 
-    userRef.update({
-      savedCards: firebase.firestore.FieldValue.arrayUnion(cardId)
-    }).then(() => {
-      cdToast("⭐ Card saved to your collection.");
+    userRef.get().then((doc) => {
+      const alreadySaved = doc.exists && (doc.data().savedCards || []).includes(cardId);
+      if (alreadySaved) {
+        cdToast("This card is already in your collection.");
+        return;
+      }
+
+      userRef.update({
+        savedCards: firebase.firestore.FieldValue.arrayUnion(cardId)
+      }).then(() => {
+        cdToast("⭐ Card saved to your collection.");
+      }).catch((err) => {
+        // .update() fails if the user doc doesn't exist yet — fall back to creating it
+        userRef.set({
+          savedCards: [cardId],
+          role: 'Operator'
+        }, { merge: true })
+          .then(() => cdToast("⭐ Card saved to your collection."))
+          .catch(e => {
+            console.error("Error saving card:", e);
+            cdToast("Couldn't save that card — please try again.", "error");
+          });
+      });
     }).catch((err) => {
-      // .update() fails if the user doc doesn't exist yet — fall back to creating it
-      userRef.set({
-        savedCards: [cardId],
-        role: 'Operator'
-      }, { merge: true })
-        .then(() => cdToast("⭐ Card saved to your collection."))
-        .catch(e => {
-          console.error("Error saving card:", e);
-          cdToast("Couldn't save that card — please try again.", "error");
-        });
+      console.error("Error checking existing collection:", err);
+      cdToast("Couldn't save that card — please try again.", "error");
     });
   }
 </script>
