@@ -32,6 +32,7 @@
     <a href="index.html">🏠 Home</a>
     <a href="cards.html">📸 Snapshot Cards</a>
     <a href="protocols.html">📡 Protocol Library</a>
+    <a href="collection.html">🗂️ My Collection</a>
   </div>
   <div class="breadcrumbs">
     <a href="index.html">Home</a>
@@ -161,53 +162,36 @@
   });
 </script>
 
-<!-- CYNETIS-7 TRANSMISSION SCRIPT -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // ... (your existing Cynetis-7 code) ...
-    setTimeout(typeEffect, 300);
-  });
-</script>
+<!-- FIREBASE COMPAT SDK LINKS -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-<!-- ========================================================== -->
-<!-- PASTE THE NEW MASTER SCRIPT RIGHT HERE -->
-<!-- ========================================================== -->
 <script>
-  // --- THE MASTER ASSET MAP ---
+  // --- PDF ASSET MAP (used by the Tally submission listener below) ---
   const pdfAssetMap = {
     "/sony-a7iv-portrait-bright-natural": "https://raw.githubusercontent.com/CamerasDecoded/camerasdecoded-settings/main/cards/sony-a7iv-portrait-bright-natural-card.pdf"
   };
 
-  // --- LISTEN FOR TALLY SUBMISSIONS ---
+  // --- LISTEN FOR TALLY SUBMISSIONS (email-gated PDF download) ---
   window.addEventListener('message', (e) => {
     if (e && e.data && typeof e.data === 'string' && e.data.includes('Tally.FormSubmitted')) {
       try {
         const payload = JSON.parse(e.data);
         const fields = payload.data.fields;
-
         const pageField = fields.find(field => field.name === 'originPage');
         if (pageField && pageField.value) {
-          let detectedPath = pageField.value.toLowerCase(); 
-
+          let detectedPath = pageField.value.toLowerCase();
           if (detectedPath.includes('://')) {
-            try {
-              detectedPath = new URL(detectedPath).pathname;
-            } catch (urlErr) {
-              detectedPath = '/' + detectedPath.split('.com/')[1];
-            }
+            try { detectedPath = new URL(detectedPath).pathname; } catch (urlErr) { detectedPath = '/' + detectedPath.split('.com/')[1]; }
           }
-          if (detectedPath.endsWith('/') && detectedPath.length > 1) {
-            detectedPath = detectedPath.slice(0, -1);
-          }
-          
+          if (detectedPath.endsWith('/') && detectedPath.length > 1) { detectedPath = detectedPath.slice(0, -1); }
           const finalDownloadUrl = pdfAssetMap[detectedPath];
-          
           if (finalDownloadUrl) {
-            // THE POP-UP BYPASS
             const downloadLink = document.createElement('a');
             downloadLink.href = finalDownloadUrl;
             downloadLink.target = '_blank';
-            downloadLink.download = finalDownloadUrl.split('/').pop(); 
+            downloadLink.download = finalDownloadUrl.split('/').pop();
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
@@ -220,90 +204,95 @@
       }
     }
   });
-</script>
 
-<!-- ========================================================== -->
-<!-- PASTE THE NEW MASTER SCRIPT RIGHT HERE -->
-<!-- ========================================================== -->
-<!-- FIREBASE COMPAT SDK LINKS -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://gstatic.com"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
-<script>
-  // --- THE MASTER ASSET MAP ---
-  const pdfAssetMap = {
-    "/sony-a7iv-portrait-bright-natural": "https://raw.githubusercontent.com/CamerasDecoded/camerasdecoded-settings/main/cards/sony-a7iv-portrait-bright-natural-card.pdf"
-  };
-
-  // --- LISTEN FOR TALLY SUBMISSIONS ---
-  window.addEventListener('message', (e) => {
-    if (e && e.data && typeof e.data === 'string' && e.data.includes('Tally.FormSubmitted')) {
-      try {
-        const payload = JSON.parse(e.data);
-        const fields = payload.data.fields;
-        const pageField = fields.find(field => field.name === 'originPage');
-        if (pageField && pageField.value) {
-          let detectedPath = pageField.value.toLowerCase(); 
-          if (detectedPath.includes('://')) {
-            try { detectedPath = new URL(detectedPath).pathname; } catch (urlErr) { detectedPath = '/' + detectedPath.split('.com/')[1]; }
-          }
-          if (detectedPath.endsWith('/') && detectedPath.length > 1) { detectedPath = detectedPath.slice(0, -1); }
-          const finalDownloadUrl = pdfAssetMap[detectedPath];
-          if (finalDownloadUrl) {
-            const downloadLink = document.createElement('a');
-            downloadLink.href = finalDownloadUrl;
-            downloadLink.target = '_blank';
-            downloadLink.download = finalDownloadUrl.split('/').pop(); 
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-          }
-        }
-      } catch (error) { console.error("Error parsing Tally submission:", error); }
-    }
-  });
-
-  // --- INITIALIZE FIREBASE CONFIG ---
+  // --- INITIALIZE FIREBASE ---
   const firebaseConfig = {
     apiKey: "AIzaSyB95Vx0i8W6WNfUy1N4TNQyfN5xCxQYnz8",
-    authDomain: "://firebaseapp.com",
+    authDomain: "cameras-decoded.firebaseapp.com",
     projectId: "cameras-decoded",
     storageBucket: "cameras-decoded.firebasestorage.app",
     messagingSenderId: "1088920052790",
     appId: "1:1088920052790:web:2177c1fb31109c1fa02497",
     measurementId: "G-YN3M01WW0B"
   };
-  
+
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // --- THE FIXED SAVE FUNCTION ---
-  function saveCardToCollection = (cardId) => {
-    const savedUid = localStorage.getItem('cameras_decoded_uid');
-    
-    if (!savedUid) {
-      showToast("Please log in to your Cameras Decoded account to save cards to your collection. Redirecting...");
-      window.location.href = "https://camerasdecoded.com" + encodeURIComponent(window.location.href); 
+  // This page's card slug — used to match a "pending save" after a login round-trip
+  const THIS_CARD_ID = 'sony-a7iv-portrait-bright-natural';
+  const UID_KEY = 'cameras_decoded_uid';
+
+  // --- AUTH TOKEN BRIDGE ---
+  // Safari's Intelligent Tracking Prevention blocks the hidden-iframe mechanism
+  // Firebase Auth normally uses to share a login session across subdomains, so
+  // camerasdecoded.com and settings.camerasdecoded.com can't rely on
+  // firebase.auth() syncing automatically. Instead, login.html appends the
+  // user's uid as ?opToken=... when it redirects back here. We capture that
+  // token into THIS origin's own localStorage, then use localStorage (not
+  // firebase.auth()) as the source of truth for "is this user logged in" on
+  // every settings.camerasdecoded.com page.
+  (function captureAuthToken() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('opToken');
+    if (token) {
+      localStorage.setItem(UID_KEY, token);
+      // Clean the token out of the visible URL without reloading the page
+      params.delete('opToken');
+      const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, '', cleanUrl);
+    }
+  })();
+
+  function getCurrentUid() {
+    return localStorage.getItem(UID_KEY);
+  }
+
+  // If we just came back from a login redirect triggered by this exact card's
+  // save button, finish the save automatically.
+  (function retryPendingSave() {
+    const uid = getCurrentUid();
+    const pendingCard = localStorage.getItem('pending_save_card');
+    if (uid && pendingCard === THIS_CARD_ID) {
+      localStorage.removeItem('pending_save_card');
+      performSave(pendingCard, uid);
+    }
+  })();
+
+  // --- SAVE-TO-COLLECTION ---
+  // Standardized on `savedCards` (camelCase) to match the field already
+  // in production Firestore documents. arrayUnion is a no-op if the card
+  // is already saved, so this also handles "re-add with no limits" safely.
+  function saveCardToCollection(cardId) {
+    const uid = getCurrentUid();
+    if (!uid) {
+      // Remember what we were trying to save, then send the user to log in
+      // with a redirect back to this exact page.
+      localStorage.setItem('pending_save_card', cardId);
+      const returnUrl = window.location.href;
+      window.location.href = "https://camerasdecoded.com/login.html?redirect=" + encodeURIComponent(returnUrl);
       return;
     }
+    performSave(cardId, uid);
+  }
 
-    const userRef = db.collection('users').doc(savedUid);
-    
+  function performSave(cardId, uid) {
+    const userRef = db.collection('users').doc(uid);
+
     userRef.update({
-      saved_cards: firebase.firestore.FieldValue.arrayUnion(cardId)
+      savedCards: firebase.firestore.FieldValue.arrayUnion(cardId)
     }).then(() => {
-      showToast("Card saved to your collection successfully!");
+      alert("⭐ Card saved to your collection successfully!");
     }).catch((err) => {
-      userRef.set({ 
-        saved_cards: [cardId],
+      // .update() fails if the user doc doesn't exist yet — fall back to creating it
+      userRef.set({
+        savedCards: [cardId],
         role: 'Operator'
       }, { merge: true })
-        .then(() => showToast("Card saved to your collection!"))
+        .then(() => alert("⭐ Card saved to your collection!"))
         .catch(e => console.error("Error saving card:", e));
     });
-  };
+  }
 </script>
-<script src="toast-system.js"></script>
 </body>
 </html>
