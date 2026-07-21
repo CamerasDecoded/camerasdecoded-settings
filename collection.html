@@ -103,8 +103,17 @@
   // --- RENDERING LOOP ENGINE ---
   function loadUserCollectionGrid(uid) {
     const grid = document.getElementById('collectionGrid');
-    
+    const loadStartTime = Date.now();
+    const MIN_LOADING_MS = 1000; // keep "Establishing secure signal link..." readable even on fast connections
+
+    function afterMinimumDelay(callback) {
+      const elapsed = Date.now() - loadStartTime;
+      const remaining = Math.max(MIN_LOADING_MS - elapsed, 0);
+      setTimeout(callback, remaining);
+    }
+
     db.collection('users').doc(uid).get().then((doc) => {
+      afterMinimumDelay(() => {
       grid.innerHTML = ''; // Wipe loader text values pristine
 
       if (doc.exists) {
@@ -147,9 +156,12 @@
       } else {
         grid.innerHTML = '<div class="empty-state">Operator account document profile not initialized in database.</div>';
       }
+      });
     }).catch((err) => {
-      console.error("Collection visualization error trace logs: ", err);
-      grid.innerHTML = '<div class="empty-state">Error syncing cloud dataset tracking nodes.</div>';
+      afterMinimumDelay(() => {
+        console.error("Collection visualization error trace logs: ", err);
+        grid.innerHTML = '<div class="empty-state">Error syncing cloud dataset tracking nodes.</div>';
+      });
     });
   }
 
