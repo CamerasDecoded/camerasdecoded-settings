@@ -30,6 +30,13 @@
     .back-link { display: block; text-align: center; margin-top: 40px; color: #b4b4b4; text-decoration: none; font-size: 14px; }
     .back-link:hover { color: #8deb00; }
     .empty-state { text-align: center; padding: 60px 20px; color: #b4b4b4; font-family: 'Space Mono', monospace; grid-column: 1 / -1; }
+    .collection-card img {
+  background: #0A0A0A;
+  transition: border-color 0.2s;
+}
+.collection-card:hover img {
+  border-color: #8deb00;
+}
   </style>
 </head>
 <body>
@@ -89,7 +96,7 @@
       window.history.replaceState({}, '', cleanUrl);
     }
 
-    const uid = localStorage.getItem(UID_KEY);
+    const uid = localStorage.getItem('cameras_decoded_uid');
     if (uid) {
       loadUserCollectionGrid(uid);
     } else {
@@ -107,7 +114,7 @@
 
       if (doc.exists) {
         const data = doc.data();
-        const savedIds = data.savedCards || [];
+        const savedIds = data.saved_cards || [];
 
         // Route "Back to Dashboard" to the correct dashboard for this user's role
         const dashboardLink = document.getElementById('backToDashboardLink');
@@ -132,12 +139,17 @@
           const displayName = id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
           
           cardNode.innerHTML = `
-            <a href="${id}.html" class="card-main-link">
-              <div style="font-size: 48px; margin-bottom: 10px;">📸</div>
-              <div class="camera">${displayName}</div>
-            </a>
-            <button class="remove-card-btn" onclick="removeCardFromCollection('${id}', '${uid}')">Remove</button>
-          `;
+  <a href="${id}.html" class="card-main-link">
+    <img src="cards/${id}-card.png" 
+         alt="${displayName}" 
+         style="width:100%; max-width:200px; height:auto; border-radius:4px; margin-bottom:10px; border:1px solid #1A1A1A;"
+         loading="lazy"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <div style="display:none; font-size:48px; margin-bottom:10px;">📸</div>
+    <div class="camera">${displayName}</div>
+  </a>
+  <button class="remove-card-btn" onclick="removeCardFromCollection('${id}', '${uid}')">❌ Remove Card</button>
+`;
           grid.appendChild(cardNode);
         });
       } else {
@@ -157,7 +169,7 @@
 
     // Atomically removes just this one entry from the array field
     db.collection('users').doc(uid).update({
-      savedCards: firebase.firestore.FieldValue.arrayRemove(cardId)
+      saved_cards: firebase.firestore.FieldValue.arrayRemove(cardId)
     })
     .then(() => {
       // Success: Animation removal sweep execution from user display view elements
