@@ -134,7 +134,9 @@
           
           cardNode.innerHTML = `
             <a href="${id}.html" class="card-main-link">
-              <div style="font-size: 48px; margin-bottom: 10px;">📸</div>
+              <img src="cards/${id}-card.png" alt="${displayName}" loading="lazy"
+                   style="width:100%; max-width:200px; height:auto; border-radius:4px; border:1px solid #1A1A1A; margin-bottom:10px;"
+                   onerror="this.outerHTML='<div style=\\'font-size: 48px; margin-bottom: 10px;\\'>📸</div>'">
               <div class="camera">${displayName}</div>
             </a>
             <button class="remove-card-btn" onclick="removeCardFromCollection('${id}', '${uid}')">Remove</button>
