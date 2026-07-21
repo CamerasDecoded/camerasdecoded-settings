@@ -46,7 +46,7 @@
 
   <div style="text-align: center;">
     <a href="index.html" class="back-link">← Return to Atlas</a>
-    <a href="https://camerasdecoded.com" class="back-link" style="margin-top: 10px;">🖥️ Back to Dashboard</a>
+    <a href="https://camerasdecoded.com/operator-dashboard.html" id="backToDashboardLink" class="back-link" style="margin-top: 10px;">🖥️ Back to Dashboard</a>
   </div>
 </div>
 
@@ -108,6 +108,15 @@
       if (doc.exists) {
         const data = doc.data();
         const savedIds = data.savedCards || [];
+
+        // Route "Back to Dashboard" to the correct dashboard for this user's role
+        const dashboardLink = document.getElementById('backToDashboardLink');
+        if (dashboardLink) {
+          const role = data.role || 'Operator';
+          if (role === 'Instructor') dashboardLink.href = 'https://camerasdecoded.com/instructor-dashboard.html';
+          else if (role === 'Partner') dashboardLink.href = 'https://camerasdecoded.com/partner-dashboard.html';
+          else dashboardLink.href = 'https://camerasdecoded.com/operator-dashboard.html';
+        }
 
         if (savedIds.length === 0) {
           grid.innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
