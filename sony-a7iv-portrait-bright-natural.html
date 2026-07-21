@@ -166,6 +166,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="cd-ui.js"></script>
 
 <script>
   // --- PDF ASSET MAP (used by the Tally submission listener below) ---
@@ -282,15 +283,18 @@
     userRef.update({
       savedCards: firebase.firestore.FieldValue.arrayUnion(cardId)
     }).then(() => {
-      alert("⭐ Card saved to your collection successfully!");
+      cdToast("⭐ Card saved to your collection.");
     }).catch((err) => {
       // .update() fails if the user doc doesn't exist yet — fall back to creating it
       userRef.set({
         savedCards: [cardId],
         role: 'Operator'
       }, { merge: true })
-        .then(() => alert("⭐ Card saved to your collection!"))
-        .catch(e => console.error("Error saving card:", e));
+        .then(() => cdToast("⭐ Card saved to your collection."))
+        .catch(e => {
+          console.error("Error saving card:", e);
+          cdToast("Couldn't save that card — please try again.", "error");
+        });
     });
   }
 </script>

@@ -54,6 +54,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="cd-ui.js"></script>
 
 <script>
   let db; // Global reference placeholder for data operations
@@ -151,30 +152,31 @@
 
   // --- THE MASTER DELETION OPERATION ---
   function removeCardFromCollection(cardId, uid) {
-    if (!confirm("Are you sure you want to drop this card snapshot from your operator dashboard page?")) {
-      return;
-    }
+    cdConfirm("Remove this card from your collection?").then((confirmed) => {
+      if (!confirmed) return;
 
-    // Atomically removes just this one entry from the array field
-    db.collection('users').doc(uid).update({
-      savedCards: firebase.firestore.FieldValue.arrayRemove(cardId)
-    })
-    .then(() => {
-      // Success: Animation removal sweep execution from user display view elements
-      const activeVisualNode = document.getElementById(`wrapper-${cardId}`);
-      if (activeVisualNode) {
-        activeVisualNode.remove();
-        
-        // Double-check element volume count. If empty, write fallback notice
-        const remainingBlocks = document.querySelectorAll('.collection-card');
-        if (remainingBlocks.length === 0) {
-          document.getElementById('collectionGrid').innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
+      // Atomically removes just this one entry from the array field
+      db.collection('users').doc(uid).update({
+        savedCards: firebase.firestore.FieldValue.arrayRemove(cardId)
+      })
+      .then(() => {
+        // Success: Animation removal sweep execution from user display view elements
+        const activeVisualNode = document.getElementById(`wrapper-${cardId}`);
+        if (activeVisualNode) {
+          activeVisualNode.remove();
+
+          // Double-check element volume count. If empty, write fallback notice
+          const remainingBlocks = document.querySelectorAll('.collection-card');
+          if (remainingBlocks.length === 0) {
+            document.getElementById('collectionGrid').innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
+          }
         }
-      }
-    })
-    .catch((error) => {
-      console.error("Firestore transaction removal fault event: ", error);
-      alert("Could not link data update adjustments to live tracking profile.");
+        cdToast("Card removed from your collection.");
+      })
+      .catch((error) => {
+        console.error("Firestore transaction removal fault event: ", error);
+        cdToast("Couldn't remove that card — please try again.", "error");
+      });
     });
   }
 </script>
