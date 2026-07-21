@@ -20,12 +20,11 @@
     
     /* Style for the newly added custom Remove button */
     .remove-card-btn {
-      background: transparent; border: 1px solid #333; color: #888;
-      font-family: 'Space Mono', monospace; font-size: 10px; padding: 4px 10px;
+      background: transparent; border: 1px solid #ff4a4a; color: #ff4a4a;
+      font-family: 'Space Mono', monospace; font-size: 11px; padding: 6px 12px;
       border-radius: 4px; cursor: pointer; text-transform: uppercase; transition: all 0.2s;
-      letter-spacing: 0.5px;
     }
-    .remove-card-btn:hover { border-color: #ff4a4a; color: #ff4a4a; background: rgba(255, 74, 74, 0.08); }
+    .remove-card-btn:hover { background: rgba(255, 74, 74, 0.15); box-shadow: 0 0 15px rgba(255, 74, 74, 0.3); }
     
     .back-link { display: block; text-align: center; margin-top: 40px; color: #b4b4b4; text-decoration: none; font-size: 14px; }
     .back-link:hover { color: #8deb00; }
@@ -46,13 +45,13 @@
 
   <div style="text-align: center;">
     <a href="index.html" class="back-link">← Return to Atlas</a>
-    <a href="https://camerasdecoded.com/operator-dashboard.html" id="backToDashboardLink" class="back-link" style="margin-top: 10px;">🖥️ Back to Dashboard</a>
+    <a href="https://camerasdecoded.com" class="back-link" style="margin-top: 10px;">🖥️ Back to Dashboard</a>
   </div>
 </div>
 
-<!-- FIREBASE UTILITY LIBRARIES -->
+<!-- FIXED CORE FIREBASE UTILITY LIBRARIES -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://gstatic.com"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
@@ -71,29 +70,26 @@
     
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
+    const auth = firebase.auth();
 
-    const UID_KEY = 'cameras_decoded_uid';
-
-    // --- AUTH TOKEN BRIDGE ---
-    // Safari's ITP blocks the hidden-iframe mechanism Firebase Auth normally
-    // uses to share a session across subdomains, so we can't rely on
-    // firebase.auth() here. Instead, camerasdecoded.com passes the uid as
-    // ?opToken=... on any link into this subdomain; we capture it into this
-    // origin's own localStorage and use that as the source of truth.
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('opToken');
-    if (token) {
-      localStorage.setItem(UID_KEY, token);
-      params.delete('opToken');
-      const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-      window.history.replaceState({}, '', cleanUrl);
-    }
-
-    const uid = localStorage.getItem(UID_KEY);
-    if (uid) {
-      loadUserCollectionGrid(uid);
+    // ==========================================================
+  // FIXED CROSS-SUBDOMAIN FIREBASE AUTH REPLACEMENT LOOP
+  // ==========================================================
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      console.log("Secure subdomain session verified for UID:", user.uid);
+      
+      // Maintain local variables for your fallback scripts
+      localStorage.setItem('cameras_decoded_uid', user.uid);
+      
+      // Fire your loop engine to pull your user data records out of Firestore
+      loadUserCollectionGrid(user.uid);
     } else {
-      document.getElementById('collectionGrid').innerHTML =
+      console.warn("No active user session detected on this origin.");
+      localStorage.removeItem('cameras_decoded_uid');
+      
+      // Update UI container box immediately with your empty state block
+      document.getElementById('collectionGrid').innerHTML = 
         '<div class="empty-state">Access denied. Please log in through the main site to view your collection.</div>';
     }
   });
@@ -107,16 +103,8 @@
 
       if (doc.exists) {
         const data = doc.data();
-        const savedIds = data.savedCards || [];
-
-        // Route "Back to Dashboard" to the correct dashboard for this user's role
-        const dashboardLink = document.getElementById('backToDashboardLink');
-        if (dashboardLink) {
-          const role = data.role || 'Operator';
-          if (role === 'Instructor') dashboardLink.href = 'https://camerasdecoded.com/instructor-dashboard.html';
-          else if (role === 'Partner') dashboardLink.href = 'https://camerasdecoded.com/partner-dashboard.html';
-          else dashboardLink.href = 'https://camerasdecoded.com/operator-dashboard.html';
-        }
+        // FIXED: Maps to standard 'saved_cards' underscore key structure
+        const savedIds = data.saved_cards || [];
 
         if (savedIds.length === 0) {
           grid.innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
@@ -136,7 +124,7 @@
               <div style="font-size: 48px; margin-bottom: 10px;">📸</div>
               <div class="camera">${displayName}</div>
             </a>
-            <button class="remove-card-btn" onclick="removeCardFromCollection('${id}', '${uid}')">Remove</button>
+            <button class="remove-card-btn" onclick="removeCardFromCollection('${id}', '${uid}')">❌ Remove Card</button>
           `;
           grid.appendChild(cardNode);
         });
@@ -151,32 +139,30 @@
 
   // --- THE MASTER DELETION OPERATION ---
   function removeCardFromCollection(cardId, uid) {
-    if (!confirm("Are you sure you want to drop this card snapshot from your operator dashboard page?")) {
-      return;
-    }
-
-    // Atomically removes just this one entry from the array field
-    db.collection('users').doc(uid).update({
-      savedCards: firebase.firestore.FieldValue.arrayRemove(cardId)
-    })
-    .then(() => {
-      // Success: Animation removal sweep execution from user display view elements
-      const activeVisualNode = document.getElementById(`wrapper-${cardId}`);
-      if (activeVisualNode) {
-        activeVisualNode.remove();
-        
-        // Double-check element volume count. If empty, write fallback notice
-        const remainingBlocks = document.querySelectorAll('.collection-card');
-        if (remainingBlocks.length === 0) {
-          document.getElementById('collectionGrid').innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
+  showConfirm(
+    "Drop this snapshot from your operator dashboard?",
+    () => {
+      db.collection('users').doc(uid).update({
+        saved_cards: firebase.firestore.FieldValue.arrayRemove(cardId)
+      })
+      .then(() => {
+        const activeVisualNode = document.getElementById(`wrapper-${cardId}`);
+        if (activeVisualNode) {
+          activeVisualNode.remove();
+          const remainingBlocks = document.querySelectorAll('.collection-card');
+          if (remainingBlocks.length === 0) {
+            document.getElementById('collectionGrid').innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
+          }
         }
-      }
-    })
-    .catch((error) => {
-      console.error("Firestore transaction removal fault event: ", error);
-      alert("Could not link data update adjustments to live tracking profile.");
-    });
-  }
+      })
+      .catch((error) => {
+        console.error("Firestore transaction removal fault event: ", error);
+        showToast("Could not link data update adjustments to live tracking profile.");
+      });
+    },
+    () => {} // cancel – do nothing
+  );
+}
 </script>
 </body>
 </html>
