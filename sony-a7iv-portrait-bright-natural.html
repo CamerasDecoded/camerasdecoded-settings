@@ -161,14 +161,6 @@
   });
 </script>
 
-<!-- CYNETIS-7 TRANSMISSION SCRIPT -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // ... (your existing Cynetis-7 code) ...
-    setTimeout(typeEffect, 300);
-  });
-</script>
-
 <!-- FIREBASE COMPAT SDK LINKS -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -224,38 +216,55 @@
   };
 
   firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
   const db = firebase.firestore();
 
   // This page's card slug — used to match a "pending save" after a login round-trip
   const THIS_CARD_ID = 'sony-a7iv-portrait-bright-natural';
+  const UID_KEY = 'cameras_decoded_uid';
 
-  // Track the signed-in user via the real Firebase Auth session (this syncs
-  // across camerasdecoded.com and settings.camerasdecoded.com automatically,
-  // since both use the same Firebase project + authDomain — no manual
-  // token-passing needed).
-  let currentUser = null;
-
-  auth.onAuthStateChanged((user) => {
-    currentUser = user;
-
-    if (user) {
-      // If the user just came back from a login redirect triggered by this
-      // exact card's save button, finish the save automatically.
-      const pendingCard = localStorage.getItem('pending_save_card');
-      if (pendingCard === THIS_CARD_ID) {
-        localStorage.removeItem('pending_save_card');
-        performSave(pendingCard);
-      }
+  // --- AUTH TOKEN BRIDGE ---
+  // Safari's Intelligent Tracking Prevention blocks the hidden-iframe mechanism
+  // Firebase Auth normally uses to share a login session across subdomains, so
+  // camerasdecoded.com and settings.camerasdecoded.com can't rely on
+  // firebase.auth() syncing automatically. Instead, login.html appends the
+  // user's uid as ?opToken=... when it redirects back here. We capture that
+  // token into THIS origin's own localStorage, then use localStorage (not
+  // firebase.auth()) as the source of truth for "is this user logged in" on
+  // every settings.camerasdecoded.com page.
+  (function captureAuthToken() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('opToken');
+    if (token) {
+      localStorage.setItem(UID_KEY, token);
+      // Clean the token out of the visible URL without reloading the page
+      params.delete('opToken');
+      const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, '', cleanUrl);
     }
-  });
+  })();
+
+  function getCurrentUid() {
+    return localStorage.getItem(UID_KEY);
+  }
+
+  // If we just came back from a login redirect triggered by this exact card's
+  // save button, finish the save automatically.
+  (function retryPendingSave() {
+    const uid = getCurrentUid();
+    const pendingCard = localStorage.getItem('pending_save_card');
+    if (uid && pendingCard === THIS_CARD_ID) {
+      localStorage.removeItem('pending_save_card');
+      performSave(pendingCard, uid);
+    }
+  })();
 
   // --- SAVE-TO-COLLECTION ---
   // Standardized on `savedCards` (camelCase) to match the field already
   // in production Firestore documents. arrayUnion is a no-op if the card
   // is already saved, so this also handles "re-add with no limits" safely.
   function saveCardToCollection(cardId) {
-    if (!currentUser) {
+    const uid = getCurrentUid();
+    if (!uid) {
       // Remember what we were trying to save, then send the user to log in
       // with a redirect back to this exact page.
       localStorage.setItem('pending_save_card', cardId);
@@ -263,11 +272,11 @@
       window.location.href = "https://camerasdecoded.com/login.html?redirect=" + encodeURIComponent(returnUrl);
       return;
     }
-    performSave(cardId);
+    performSave(cardId, uid);
   }
 
-  function performSave(cardId) {
-    const userRef = db.collection('users').doc(currentUser.uid);
+  function performSave(cardId, uid) {
+    const userRef = db.collection('users').doc(uid);
 
     userRef.update({
       savedCards: firebase.firestore.FieldValue.arrayUnion(cardId)

@@ -70,29 +70,31 @@
     
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
-    const auth = firebase.auth();
 
-    // ==========================================================
-  // FIXED CROSS-SUBDOMAIN FIREBASE AUTH REPLACEMENT LOOP
-  // ==========================================================
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      console.log("Secure subdomain session verified for UID:", user.uid);
-      
-      // Maintain local variables for your fallback scripts
-      localStorage.setItem('cameras_decoded_uid', user.uid);
-      
-      // Fire your loop engine to pull your user data records out of Firestore
-      loadUserCollectionGrid(user.uid);
+    const UID_KEY = 'cameras_decoded_uid';
+
+    // --- AUTH TOKEN BRIDGE ---
+    // Safari's ITP blocks the hidden-iframe mechanism Firebase Auth normally
+    // uses to share a session across subdomains, so we can't rely on
+    // firebase.auth() here. Instead, camerasdecoded.com passes the uid as
+    // ?opToken=... on any link into this subdomain; we capture it into this
+    // origin's own localStorage and use that as the source of truth.
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('opToken');
+    if (token) {
+      localStorage.setItem(UID_KEY, token);
+      params.delete('opToken');
+      const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, '', cleanUrl);
+    }
+
+    const uid = localStorage.getItem(UID_KEY);
+    if (uid) {
+      loadUserCollectionGrid(uid);
     } else {
-      console.warn("No active user session detected on this origin.");
-      localStorage.removeItem('cameras_decoded_uid');
-      
-      // Update UI container box immediately with your empty state block
-      document.getElementById('collectionGrid').innerHTML = 
+      document.getElementById('collectionGrid').innerHTML =
         '<div class="empty-state">Access denied. Please log in through the main site to view your collection.</div>';
     }
-  });
 
   // --- RENDERING LOOP ENGINE ---
   function loadUserCollectionGrid(uid) {
