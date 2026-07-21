@@ -20,11 +20,12 @@
     
     /* Style for the newly added custom Remove button */
     .remove-card-btn {
-      background: transparent; border: 1px solid #ff4a4a; color: #ff4a4a;
-      font-family: 'Space Mono', monospace; font-size: 11px; padding: 6px 12px;
+      background: transparent; border: 1px solid #333; color: #888;
+      font-family: 'Space Mono', monospace; font-size: 10px; padding: 4px 10px;
       border-radius: 4px; cursor: pointer; text-transform: uppercase; transition: all 0.2s;
+      letter-spacing: 0.5px;
     }
-    .remove-card-btn:hover { background: rgba(255, 74, 74, 0.15); box-shadow: 0 0 15px rgba(255, 74, 74, 0.3); }
+    .remove-card-btn:hover { border-color: #ff4a4a; color: #ff4a4a; background: rgba(255, 74, 74, 0.08); }
     
     .back-link { display: block; text-align: center; margin-top: 40px; color: #b4b4b4; text-decoration: none; font-size: 14px; }
     .back-link:hover { color: #8deb00; }
@@ -126,7 +127,7 @@
               <div style="font-size: 48px; margin-bottom: 10px;">📸</div>
               <div class="camera">${displayName}</div>
             </a>
-            <button class="remove-card-btn" onclick="removeCardFromCollection('${id}', '${uid}')">❌ Remove Card</button>
+            <button class="remove-card-btn" onclick="removeCardFromCollection('${id}', '${uid}')">Remove</button>
           `;
           grid.appendChild(cardNode);
         });
