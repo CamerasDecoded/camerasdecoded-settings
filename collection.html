@@ -18,6 +18,7 @@
     .collection-card a.card-main-link { text-decoration: none; color: #ffffff; display: block; flex-grow: 1; }
     .collection-card .camera { color: #8deb00; font-family: 'Space Mono', monospace; font-size: 14px; margin-top: 10px; margin-bottom: 15px; text-transform: uppercase; }
     
+    /* Style for the newly added custom Remove button */
     .remove-card-btn {
       background: transparent; border: 1px solid #333; color: #888;
       font-family: 'Space Mono', monospace; font-size: 10px; padding: 4px 10px;
@@ -29,20 +30,6 @@
     .back-link { display: block; text-align: center; margin-top: 40px; color: #b4b4b4; text-decoration: none; font-size: 14px; }
     .back-link:hover { color: #8deb00; }
     .empty-state { text-align: center; padding: 60px 20px; color: #b4b4b4; font-family: 'Space Mono', monospace; grid-column: 1 / -1; }
-
-    /* Thumbnail styling */
-    .collection-card img {
-      width: 100%;
-      max-width: 200px;
-      height: auto;
-      border-radius: 4px;
-      margin-bottom: 10px;
-      border: 1px solid #1A1A1A;
-      background: #0A0A0A;
-    }
-    .collection-card:hover img {
-      border-color: #8deb00;
-    }
   </style>
 </head>
 <body>
@@ -69,7 +56,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
-  let db;
+  let db; // Global reference placeholder for data operations
 
   document.addEventListener('DOMContentLoaded', () => {
     const firebaseConfig = {
@@ -88,6 +75,11 @@
     const UID_KEY = 'cameras_decoded_uid';
 
     // --- AUTH TOKEN BRIDGE ---
+    // Safari's ITP blocks the hidden-iframe mechanism Firebase Auth normally
+    // uses to share a session across subdomains, so we can't rely on
+    // firebase.auth() here. Instead, camerasdecoded.com passes the uid as
+    // ?opToken=... on any link into this subdomain; we capture it into this
+    // origin's own localStorage and use that as the source of truth.
     const params = new URLSearchParams(window.location.search);
     const token = params.get('opToken');
     if (token) {
@@ -111,12 +103,11 @@
     const grid = document.getElementById('collectionGrid');
     
     db.collection('users').doc(uid).get().then((doc) => {
-      grid.innerHTML = '';
+      grid.innerHTML = ''; // Wipe loader text values pristine
 
       if (doc.exists) {
         const data = doc.data();
-        // ✅ FIXED: use 'saved_cards' (matches the save function)
-        const savedIds = data.saved_cards || [];
+        const savedIds = data.savedCards || [];
 
         // Route "Back to Dashboard" to the correct dashboard for this user's role
         const dashboardLink = document.getElementById('backToDashboardLink');
@@ -135,18 +126,14 @@
         savedIds.forEach(id => {
           const cardNode = document.createElement('div');
           cardNode.className = 'collection-card';
-          cardNode.id = `wrapper-${id}`;
+          cardNode.id = `wrapper-${id}`; // Dynamic targeting id descriptor
           
+          // Re-format string keys to pretty text layout formats
           const displayName = id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
           
-          // ✅ REPLACED emoji with real thumbnail PNG (same path as cards.html)
           cardNode.innerHTML = `
             <a href="${id}.html" class="card-main-link">
-              <img src="cards/${id}-card.png" 
-                   alt="${displayName}" 
-                   loading="lazy"
-                   onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-              <div style="display:none; font-size:48px; margin-bottom:10px;">📸</div>
+              <div style="font-size: 48px; margin-bottom: 10px;">📸</div>
               <div class="camera">${displayName}</div>
             </a>
             <button class="remove-card-btn" onclick="removeCardFromCollection('${id}', '${uid}')">Remove</button>
@@ -168,14 +155,17 @@
       return;
     }
 
-    // ✅ FIXED: use 'saved_cards' (matches the read field)
+    // Atomically removes just this one entry from the array field
     db.collection('users').doc(uid).update({
-      saved_cards: firebase.firestore.FieldValue.arrayRemove(cardId)
+      savedCards: firebase.firestore.FieldValue.arrayRemove(cardId)
     })
     .then(() => {
+      // Success: Animation removal sweep execution from user display view elements
       const activeVisualNode = document.getElementById(`wrapper-${cardId}`);
       if (activeVisualNode) {
         activeVisualNode.remove();
+        
+        // Double-check element volume count. If empty, write fallback notice
         const remainingBlocks = document.querySelectorAll('.collection-card');
         if (remainingBlocks.length === 0) {
           document.getElementById('collectionGrid').innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
