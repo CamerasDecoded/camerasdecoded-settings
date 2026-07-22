@@ -257,6 +257,34 @@ p { color: #b4b4b4; font-size: 15px; margin-bottom: 12px; }
 }
 .footer a { color: #8deb00; }
 .footer a:hover { text-decoration: underline; }
+/* --- Social icons in footer --- */
+.footer .socials {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  flex-wrap: wrap;
+  margin-top: 10px;   /* optional, gives a little space above */
+}
+
+.footer .socials a {
+  color: #ffffff;
+  font-size: 18px;
+  transition: 0.2s;
+}
+
+.footer .socials a:hover {
+  color: #8deb00;
+}
+
+/* Mobile spacing */
+@media (max-width: 600px) {
+  .footer .socials {
+    gap: 30px;
+  }
+  .footer .socials a {
+    font-size: 24px;
+  }
+}
 
 /* --- RESPONSIVE --- */
 @media (max-width: 600px) {
