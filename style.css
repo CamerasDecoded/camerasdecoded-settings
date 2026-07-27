@@ -386,3 +386,21 @@ p { color: var(--text-muted); font-size: 15px; margin-bottom: 12px; }
 .cd-confirm-btn:hover { background: var(--brand-green); color: #000000; }
 .cd-confirm-btn.danger { border-color: var(--danger); color: var(--danger); }
 .cd-confirm-btn.danger:hover { background: var(--danger); color: #000000; }
+/* Scroll-Triggered Reveal Animations */
+.settings-grid, 
+.inner-signal, 
+.gear-grid, 
+.cta-box, 
+.related-grid {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+/* The class the JavaScript will add when the element hits the screen */
+.reveal-visible {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}

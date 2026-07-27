@@ -101,3 +101,39 @@
     });
   };
 })();
+// Automatically apply scroll-triggered reveals to core content blocks
+document.addEventListener('DOMContentLoaded', () => {
+    const targetSelectors = [
+        '.settings-grid', 
+        '.inner-signal', 
+        '.gear-grid', 
+        '.cta-box', 
+        '.related-grid'
+    ];
+    
+    // Gather all matching elements on the current page
+    const elementsToReveal = document.querySelectorAll(targetSelectors.join(','));
+    
+    // Configuration: trigger when 10% of the element is visible
+    const observerOptions = {
+        root: null, // uses the browser viewport
+        rootMargin: '0px',
+        threshold: 0.1 
+    };
+    
+    const revealCallback = (entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Add the CSS class that triggers the fade/slide up
+                entry.target.classList.add('reveal-visible');
+                // Stop watching this element so the animation only plays once
+                observer.unobserve(entry.target);
+            }
+        });
+    };
+    
+    const observer = new IntersectionObserver(revealCallback, observerOptions);
+    
+    // Start observing each element
+    elementsToReveal.forEach(el => observer.observe(el));
+});
