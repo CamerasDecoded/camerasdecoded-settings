@@ -386,16 +386,18 @@ p { color: var(--text-muted); font-size: 15px; margin-bottom: 12px; }
 .cd-confirm-btn:hover { background: var(--brand-green); color: #000000; }
 .cd-confirm-btn.danger { border-color: var(--danger); color: var(--danger); }
 .cd-confirm-btn.danger:hover { background: var(--danger); color: #000000; }
-/* Scroll-Triggered Reveal Animations */
+/* Enhanced Scroll-Triggered Reveal Animations */
 .settings-grid, 
 .inner-signal, 
 .gear-grid, 
 .cta-box, 
 .related-grid {
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
-                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Increased distance for high visibility */
+    transform: translateY(40px); 
+    /* Sweeping, highly visible easing curve */
+    transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), 
+                transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
     will-change: opacity, transform;
 }
 
@@ -404,3 +406,7 @@ p { color: var(--text-muted); font-size: 15px; margin-bottom: 12px; }
     opacity: 1 !important;
     transform: translateY(0) !important;
 }
+/* If elements appear together, stagger their entrance intentionally */
+.inner-signal.reveal-visible { transition-delay: 0.15s; }
+.gear-grid.reveal-visible    { transition-delay: 0.3s; }
+.cta-box.reveal-visible     { transition-delay: 0.45s; }
