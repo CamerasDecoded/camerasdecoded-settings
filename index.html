@@ -3,48 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Decoder Atlas — settings.camerasdecoded.com</title>
+  <title>Decoder Atlas — Cameras Decoded</title>
   <meta name="description" content="Free camera settings for Sony, Canon, Nikon, and Fuji mirrorless cameras. Search by camera, scenario, or lighting condition.">
-  
-  <!-- FONTS: Matched exactly to your main site -->
+
+  <!-- FONTS -->
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    /* --- RESET & GLOBAL (Cameras Decoded Dark Theme) --- */
+    /* ========== BRAND GLOBALS ========== */
+    :root {
+      --space-sm: 12px;
+      --space-md: 24px;
+      --space-lg: 40px;
+      --space-xl: 64px;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background-color: #000000;
-      background-image: radial-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
       background-size: 24px 24px;
       color: #ffffff;
       font-family: 'Montserrat', sans-serif;
       line-height: 1.6;
       position: relative;
-      padding: 40px 20px;
-      max-width: 1100px;
-      margin: 0 auto;
+      display: flex;
+      min-height: 100vh;
     }
 
-    /* --- AMBIENT GREEN GLOW --- */
     body::before {
       content: "";
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 300px;
-      background: linear-gradient(180deg, rgba(29, 179, 27, 0.15) 0%, transparent 100%);
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: linear-gradient(180deg, rgba(29,179,27,0.35) 0%, rgba(0,0,0,0.95) 70%, #000000 100%);
       pointer-events: none;
       z-index: -1;
     }
 
-    /* --- PAGE FADE-IN --- */
-    .main-wrapper {
-        animation: fadeIn 0.5s ease-in-out forwards;
+    /* ===== BINARY RAIN CANVAS ===== */
+    #binary-rain {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.2;
     }
-    @keyframes fadeIn {
-        0% { opacity: 0; transform: translateY(10px); }
-        100% { opacity: 1; transform: translateY(0); }
+
+    #rain-fade {
+      position: fixed;
+      bottom: 0; left: 0;
+      width: 100vw; height: 45vh;
+      background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.85) 60%, #000000 100%);
+      pointer-events: none;
+      z-index: 0;
     }
 
     h1, h2, h3, .mono { font-family: 'Space Mono', monospace; }
@@ -52,48 +66,193 @@
     .grey-text { color: #b4b4b4; }
     a { text-decoration: none; color: inherit; transition: 0.2s; }
 
-    /* --- BRAND HEADER (Neon Gradient) --- */
-    .brand {
-      font-family: 'Space Mono', monospace;
-      font-size: 14px;
-      letter-spacing: 2px;
-      margin-bottom: 40px;
-      border-bottom: 1px solid #1A1A1A;
-      padding-bottom: 15px;
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 240px;
+      background: rgba(0,0,0,0.9);
+      padding: var(--space-md) var(--space-md);
+      border-right: 1px solid #1A1A1A;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      flex-shrink: 0;
+      z-index: 2;
     }
-    .brand a {
-      text-decoration: none;
-      font-weight: 700;
-      background: linear-gradient(90deg, #1db31b 0%, #c9e265 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .sidebar .logo img {
+      display: block;
+      height: 120px;
+      width: auto;
     }
-    .brand a:hover { opacity: 0.8; }
-
-    /* --- NAVIGATION --- */
-    .nav-links {
-      margin-top: 10px;
+    .sidebar .nav-item {
       display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .nav-links a {
-      color: #8deb00;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0;
+      color: #b4b4b4;
       font-family: 'Space Mono', monospace;
       font-size: 13px;
       letter-spacing: 0.5px;
-      transition: 0.15s ease-in-out;
+      border-bottom: 1px solid transparent;
+      transition: all 0.2s;
     }
-    .nav-links a:hover {
+    .sidebar .nav-item i {
+      font-size: 15px;
+      width: 20px;
+      text-align: center;
+      transition: color 0.2s;
+      color: inherit;
+    }
+    .sidebar .nav-item:hover,
+    .sidebar .nav-item:hover i {
       color: #8deb00;
-      text-decoration: underline;
+      transform: translateX(6px) scale(1.05);
+      text-shadow: 0 0 12px rgba(141, 235, 0, 0.6);
+      border-bottom: 1px solid #8deb00;
+    }
+    .sidebar .nav-item.active,
+    .sidebar .nav-item.active i {
+      color: #8deb00;
+      border-left: 2px solid #8deb00;
+      padding-left: 10px;
       text-shadow: 0 0 12px rgba(141, 235, 0, 0.6);
     }
+    .sidebar-divider {
+      border: none;
+      border-top: 1px solid #1A1A1A;
+      margin: 8px 0;
+    }
 
-    /* --- HERO --- */
-    .hero h1 {
+    /* ===== FLOATING HEADER ===== */
+    .floating-header {
+      position: fixed;
+      top: 12px;
+      left: 240px;
+      right: 0;
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 10px 24px;
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(141,235,0,0.15);
+      border-radius: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: #b4b4b4;
+      margin: 0 12px;
+    }
+    .floating-header a { color: #8deb00; transition: color 0.2s; }
+    .floating-header a:hover { color: #a0f520; }
+    .floating-home-icon { font-size: 17px; flex-shrink: 0; }
+    .floating-nav-links {
+      display: flex;
+      flex: 1;
+      justify-content: center;
+      gap: 25px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* ----- CHASING BORDER ----- */
+    @property --angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+    @keyframes spinBorder { to { --angle: 360deg; } }
+    .chasing-border {
+      position: relative;
+      z-index: 0;
+    }
+    .chasing-border::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: inherit;
+      background: conic-gradient(from var(--angle, 0deg), #8deb00, #00e5ff, #a0f520, #8deb00);
+      animation: spinBorder 4s linear infinite;
+      z-index: -1;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+              mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      padding: 2px;
+    }
+
+    .cart-header-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid #8deb00;
+      border-radius: 20px;
+      padding: 6px 14px;
+      color: #8deb00;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      transition: 0.2s;
+      text-decoration: none;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+    .cart-header-link:hover {
+      background: rgba(141,235,0,0.1);
+      box-shadow: 0 0 12px rgba(141,235,0,0.3);
+    }
+    .cart-count-badge {
+      background: #8deb00;
+      color: #000;
+      border-radius: 50%;
+      padding: 1px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    /* Mobile toggle */
+    .floating-toggle {
+      display: none;
+      background: transparent;
+      border: none;
+      color: #8deb00;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0 6px;
+      flex-shrink: 0;
+      margin-left: 8px;
+      transition: color 0.2s;
+    }
+    .floating-toggle:hover { color: #a0f520; }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      flex: 1;
+      padding: var(--space-md) var(--space-lg) var(--space-lg) var(--space-lg);
+      padding-top: 80px;
+      max-width: 1200px;
+      position: relative;
+      z-index: 2;
+      animation: fadeIn 0.5s ease-in-out forwards;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== DECODER ATLAS CUSTOM STYLES ===== */
+    .atlas-hero {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid #1A1A1A;
+      padding-bottom: 20px;
+    }
+    .atlas-hero h1 {
       font-size: 36px;
       background: linear-gradient(90deg, #1db31b 0%, #c9e265 100%);
       -webkit-background-clip: text;
@@ -102,25 +261,24 @@
       margin-bottom: 8px;
       letter-spacing: 1px;
     }
-    .hero .subtitle {
-      color: #b4b4b4; /* Muted grey */
-      font-size: 18px;
-      margin-bottom: 30px;
+    .atlas-hero .subtitle {
+      color: #b4b4b4;
+      font-size: 16px;
     }
 
-    /* --- SEARCH BOX (Dark Neon) --- */
+    /* Search / Filter */
     .search-box {
       display: flex;
       gap: 10px;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
       flex-wrap: wrap;
     }
     .search-box input, .search-box select {
       flex: 1;
       padding: 14px 18px;
       background: #0A0A0A;
-      border: 1px solid #2a2a2a;
-      border-radius: 6px;
+      border: 1px solid #1A1A1A;
+      border-radius: 8px;
       color: #ffffff;
       font-family: 'Montserrat', sans-serif;
       font-size: 14px;
@@ -131,27 +289,22 @@
     .search-box select {
       min-width: 150px;
       cursor: pointer;
-    }
-    .search-box input:focus, .search-box select:focus {
-      border-color: #8deb00; /* Neon green focus */
-    }
-    /* Custom dropdown arrow matching main site */
-    .search-box select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238deb00' stroke-width='2' fill='none'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 14px center;
       appearance: none;
     }
+    .search-box input:focus, .search-box select:focus {
+      border-color: #8deb00;
+    }
 
-    /* --- ARTICLE GRID (Inner Signal Card Style) --- */
+    /* Grid */
     .article-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
       margin-bottom: 40px;
     }
-
-    /* --- BRAND SECTION DIVIDERS --- */
     .brand-divider {
       grid-column: 1 / -1;
       display: flex;
@@ -163,20 +316,21 @@
       padding-top: 24px;
       border-top: 1px solid #1A1A1A;
     }
-    .brand-divider:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+    .brand-divider:first-child {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+    }
     .brand-divider .brand-name {
       font-family: 'Space Mono', monospace;
       font-size: 20px;
       color: #8deb00;
-      letter-spacing: 0.5px;
     }
     .brand-divider .brand-count {
       color: #666;
       font-size: 13px;
-      font-weight: 400;
-      margin-left: 10px;
+      margin-left: 8px;
     }
-    /* Unsponsored sections show nothing extra here — no empty-looking placeholder */
     .sponsor-credit {
       display: flex;
       align-items: center;
@@ -184,7 +338,6 @@
       font-family: 'Space Mono', monospace;
       font-size: 11px;
       color: #666;
-      letter-spacing: 0.3px;
       background: #0A0A0A;
       border: 1px solid #1A1A1A;
       border-radius: 20px;
@@ -194,6 +347,7 @@
     .sponsor-credit:hover { border-color: #8deb00; }
     .sponsor-credit a { color: #8deb00; font-weight: 600; }
     .sponsor-credit a:hover { text-decoration: underline; }
+
     .article-card {
       position: relative;
       background: #0A0A0A;
@@ -206,13 +360,6 @@
       border-color: #8deb00;
       transform: translateY(-2px);
     }
-    .article-card a {
-      text-decoration: none;
-      color: #ffffff;
-      display: block;
-    }
-
-    /* --- INNER SIGNAL CORNER ACCENT --- */
     .article-card::before {
       content: "";
       position: absolute;
@@ -237,7 +384,11 @@
       box-shadow: 0 0 8px #8deb00;
       pointer-events: none;
     }
-
+    .article-card a {
+      text-decoration: none;
+      color: #ffffff;
+      display: block;
+    }
     .article-card .camera {
       font-family: 'Space Mono', monospace;
       font-size: 14px;
@@ -255,95 +406,511 @@
       margin-top: 6px;
     }
 
-    /* --- FOOTER --- */
+    /* ---------- FOOTER ---------- */
     .footer {
-      margin-top: 60px;
-      padding-top: 20px;
       border-top: 1px solid #1A1A1A;
+      padding-top: var(--space-md);
+      margin-top: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
       font-size: 12px;
       color: #b4b4b4;
       text-align: center;
     }
-    .footer a {
-      color: #8deb00;
+    .footer .socials {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .footer .socials a {
+      color: #ffffff !important;
+      font-size: 18px;
       transition: 0.2s;
     }
-    .footer a:hover {
-      text-decoration: underline;
+    .footer .socials a:hover {
+      color: #8deb00 !important;
+    }
+    .footer .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .footer .footer-links a {
+      color: #8deb00 !important;
+    }
+    .footer .footer-links a:hover {
+      color: #a0f520 !important;
     }
 
-    /* --- RESPONSIVE --- */
-    @media (max-width: 600px) {
-      .hero h1 { font-size: 28px; }
+    /* Mobile Overlay & General Responsive */
+    @media (max-width: 1024px) {
+      body { flex-direction: column; }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid #1A1A1A;
+        padding: 15px 20px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        flex-direction: row;
+      }
+      .sidebar .logo { margin: 0; }
+      .sidebar .logo img { height: 50px; width: auto; margin: 0; }
+      .sidebar .nav-group { display: none !important; }
+      .sidebar .mobile-toggle { display: block !important; background: transparent; border: none; color: #8deb00; font-size: 28px; cursor: pointer; padding: 4px 8px; z-index: 101; }
+      .floating-toggle { display: block !important; }
+      .main-content { padding: 20px; padding-top: 100px; }
+      .floating-header { left: 10px; right: 10px; top: 70px; padding: 8px 18px; border-radius: 25px; gap: 10px; }
+      .floating-nav-links { gap: 12px; }
+      #cartHeaderLabel { display: none; }
+      .atlas-hero h1 { font-size: 28px; }
       .search-box { flex-direction: column; }
       .search-box input, .search-box select { width: 100%; }
       .article-grid { grid-template-columns: 1fr; }
-      .nav-links { gap: 12px; }
     }
+
+    .nav-group-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 10000;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 40px 20px;
+      overflow-y: auto;
+    }
+    .nav-group-overlay.open {
+      display: flex !important;
+    }
+    .nav-group-overlay .nav-item {
+      font-size: 22px;
+      padding: 12px 0;
+      color: #ffffff;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.5px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-group-overlay .nav-item i {
+      color: #8deb00;
+      font-size: 18px;
+      width: 28px;
+    }
+    .nav-group-overlay .nav-item:hover {
+      color: #8deb00;
+    }
+    .nav-group-overlay .close-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      color: #8deb00;
+      font-size: 32px;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      padding: 8px;
+      z-index: 10001;
+      font-family: 'Space Mono', monospace;
+    }
+    .nav-group-overlay .sidebar-divider {
+      display: none;
+    }
+    .nav-group-overlay .nav-item.dashboard-link {
+      color: #8deb00;
+      border-left: 2px solid #8deb00;
+      padding-left: 10px;
+      text-shadow: 0 0 12px rgba(141,235,0,0.6);
+    }
+    .nav-group-overlay .nav-item.dashboard-link i {
+      color: #8deb00;
+    }
+
+    .sidebar .mobile-toggle { display: none; }
+    @media (min-width: 1025px) {
+      .sidebar .nav-group { display: flex !important; flex-direction: column !important; }
+    }
+
+    .header-login-btn {
+      display: block;
+      color: #8deb00;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      border: 1px solid #8deb00;
+      padding: 0 10px 0 14px;
+      border-radius: 20px;
+      background: transparent;
+      transition: 0.2s;
+      text-decoration: none;
+      text-align: center;
+      width: fit-content;
+    }
+    .header-login-btn:hover { background: rgba(141,235,0,0.1); box-shadow: 0 0 15px rgba(141,235,0,0.3); }
+    @media (min-width:1025px){ .header-login-btn { margin-top:10px; margin-bottom:20px; align-self:flex-start; } }
+
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 30px; right: 30px;
+      visibility: hidden; opacity: 0;
+      width: 45px; height: 45px;
+      border-radius: 50%;
+      border: 1px solid #8deb00;
+      background: rgba(0,0,0,0.85);
+      color: #8deb00;
+      cursor: pointer;
+      font-size: 18px;
+      z-index: 999;
+      font-family: 'Space Mono', monospace;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      box-shadow: 0 0 10px rgba(141,235,0,0.2);
+    }
+    #scrollTopBtn.show { visibility: visible; opacity: 1; }
+    #scrollTopBtn:hover { background: #8deb00; color: #000000; box-shadow: 0 0 20px rgba(141,235,0,0.6); transform: translateY(-2px); }
+    @keyframes pulse {
+      0%   { transform: scale(1);   box-shadow: 0 0 10px rgba(141,235,0,0.2); }
+      50%  { transform: scale(1.15); box-shadow: 0 0 25px rgba(141,235,0,0.5); }
+      100% { transform: scale(1);   box-shadow: 0 0 10px rgba(141,235,0,0.2); }
+    }
+    #scrollTopBtn.pulse { animation: pulse 1.2s ease-in-out infinite; }
   </style>
 </head>
 <body>
 
-<!-- Page Wrapper for Fade-In -->
-<div class="main-wrapper">
+  <!-- BINARY RAIN CANVAS -->
+  <canvas id="binary-rain"></canvas>
+  <div id="rain-fade"></div>
 
-  <!-- Brand Header -->
-  <div class="brand">
-    <a href="https://camerasdecoded.com">CAMERAS DECODED</a> / <a href="https://atlas.camerasdecoded.com">DECODER ATLAS</a> / SETTINGS
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo"><img src="cameras-decoded-logo.png" alt="Cameras Decoded"></div>
+    <div style="display:flex; gap:10px; align-items:center; margin-top:10px; margin-bottom:20px; align-self:flex-start;">
+      <a href="login.html" class="header-login-btn">Log in</a>
+      <a href="signup.html" class="header-login-btn">Sign Up</a>
+    </div>
+
+    <!-- DESKTOP NAV -->
+    <div class="nav-group" id="navGroupDesktop">
+      <!-- Dashboard link will be inserted here by JS (above Home) -->
+      <a href="index.html" class="nav-item"><i class="fas fa-home"></i> Home</a>
+      <a href="operators.html" class="nav-item"><i class="fas fa-user-astronaut"></i> Operators</a>
+      <a href="community.html" class="nav-item"><i class="fas fa-users"></i> Community</a>
+      <a href="educators-pdf-viewer.html" class="nav-item"><i class="fas fa-chalkboard-teacher"></i> Instructors</a>
+      <a href="partners.html" class="nav-item"><i class="fas fa-handshake"></i> Partners</a>
+      <hr class="sidebar-divider">
+      <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> Products</a>
+      <a href="protocols.html" class="nav-item"><i class="fas fa-code-branch"></i> Protocols</a>
+      <a href="https://settings.camerasdecoded.com" class="nav-item"><i class="fas fa-id-card"></i> Snapshot Cards</a>
+      <a href="cynetis-7.html" class="nav-item"><i class="fas fa-robot"></i> Cynetis-7</a>
+      <hr class="sidebar-divider">
+      <a href="blog-updates.html" class="nav-item"><i class="fas fa-newspaper"></i> Blog/Updates</a>
+      <a href="podcast.html" class="nav-item"><i class="fas fa-podcast"></i> Podcast</a>
+      <a href="inner-signal.html" class="nav-item"><i class="fas fa-brain"></i> Inner Signal</a>
+      <a href="about.html" class="nav-item"><i class="fas fa-info-circle"></i> About</a>
+    </div>
+
+    <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">☰</button>
+  </aside>
+
+  <!-- MOBILE OVERLAY -->
+  <div class="nav-group-overlay" id="navGroupOverlay">
+    <button class="close-btn" id="closeToggle">✕</button>
+    <!-- Dashboard link will be inserted here by JS (above Home) -->
+    <a href="index.html" class="nav-item"><i class="fas fa-home"></i> Home</a>
+    <a href="operators.html" class="nav-item"><i class="fas fa-user-astronaut"></i> Operators</a>
+    <a href="community.html" class="nav-item"><i class="fas fa-users"></i> Community</a>
+    <a href="educators-pdf-viewer.html" class="nav-item"><i class="fas fa-chalkboard-teacher"></i> Instructors</a>
+    <a href="partners.html" class="nav-item"><i class="fas fa-handshake"></i> Partners</a>
+    <hr class="sidebar-divider">
+    <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> Products</a>
+    <a href="protocols.html" class="nav-item"><i class="fas fa-code-branch"></i> Protocols</a>
+    <a href="https://settings.camerasdecoded.com" class="nav-item"><i class="fas fa-id-card"></i> Snapshot Cards</a>
+    <a href="cynetis-7.html" class="nav-item"><i class="fas fa-robot"></i> Cynetis-7</a>
+    <hr class="sidebar-divider">
+    <a href="blog-updates.html" class="nav-item"><i class="fas fa-newspaper"></i> Blog/Updates</a>
+    <a href="podcast.html" class="nav-item"><i class="fas fa-podcast"></i> Podcast</a>
+    <a href="inner-signal.html" class="nav-item"><i class="fas fa-brain"></i> Inner Signal</a>
+    <a href="about.html" class="nav-item"><i class="fas fa-info-circle"></i> About</a>
+    <!-- Dashboard link container (JS will insert above Home) -->
+    <div id="mobileDashboardContainer"></div>
   </div>
 
-  <!-- Navigation -->
-  <div class="nav-links">
-    <a href="index.html">🏠 Home</a>
-    <a href="cards.html">📸 Snapshot Cards</a>
-    <a href="protocols.html">📡 Protocol Library</a>
-    <a href="collection.html">🗂️ My Collection</a>
+  <!-- FLOATING GLASS HEADER -->
+  <div class="floating-header" id="floatingHeader">
+    <a href="index.html" class="floating-home-icon" title="Home"><i class="fas fa-home"></i></a>
+    <div class="floating-nav-links">
+      <a href="operators.html">Operators</a>
+      <a href="partners.html">Partners</a>
+      <a href="educators-pdf-viewer.html">Instructors</a>
+    </div>
+    <a href="cart.html" class="cart-header-link chasing-border" id="cartHeaderLink">
+      <i class="fas fa-shopping-cart"></i> <span id="cartHeaderLabel">Cart</span>
+      <span class="cart-count-badge" id="cartHeaderCount" style="display:none;">0</span>
+    </a>
+    <button class="floating-toggle" id="floatingToggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
   </div>
 
-  <!-- Hero -->
-  <div class="hero">
-    <h1>🔍 Find Your Camera Settings</h1>
-    <div class="subtitle">Search by camera model, scenario, or lighting condition — free, no login.</div>
-  </div>
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
 
-  <!-- Search / Filter -->
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search by camera (e.g., 'Sony A7IV')" onkeyup="filterArticles()">
-    <select id="scenarioFilter" onchange="filterArticles()">
-      <option value="">All Scenarios</option>
-      <option value="Portrait">Portrait</option>
-      <option value="Event">Event</option>
-      <option value="Sports">Sports</option>
-      <option value="Real Estate">Real Estate</option>
-      <option value="Street">Street</option>
-    </select>
-    <select id="lightingFilter" onchange="filterArticles()">
-      <option value="">All Lighting</option>
-      <option value="Low Light">Low Light</option>
-      <option value="Bright Natural">Bright Natural</option>
-      <option value="Golden Hour">Golden Hour</option>
-      <option value="Indoor Artificial">Indoor Artificial</option>
-      <option value="Overcast">Overcast</option>
-    </select>
-  </div>
+    <!-- ATLAS HERO -->
+    <div class="atlas-hero">
+      <h1>🔍 Decoder Atlas</h1>
+      <div class="subtitle">Free camera settings for mirrorless operators. Search by camera, scenario, or lighting condition.</div>
+    </div>
 
-  <!-- Article Grid -->
-  <div class="article-grid" id="articleGrid">
-    <!-- Articles will be populated by JavaScript -->
-  </div>
+    <!-- Search / Filter -->
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search by camera (e.g., 'Sony A7IV')" onkeyup="filterArticles()">
+      <select id="scenarioFilter" onchange="filterArticles()">
+        <option value="">All Scenarios</option>
+        <option value="Portrait">Portrait</option>
+        <option value="Event">Event</option>
+        <option value="Sports">Sports</option>
+        <option value="Real Estate">Real Estate</option>
+        <option value="Street">Street</option>
+      </select>
+      <select id="lightingFilter" onchange="filterArticles()">
+        <option value="">All Lighting</option>
+        <option value="Low Light">Low Light</option>
+        <option value="Bright Natural">Bright Natural</option>
+        <option value="Golden Hour">Golden Hour</option>
+        <option value="Indoor Artificial">Indoor Artificial</option>
+        <option value="Overcast">Overcast</option>
+      </select>
+    </div>
 
-  <!-- Footer -->
-  <div class="footer">
-    <a href="https://camerasdecoded.com">camerasdecoded.com</a> · 
-    <a href="https://atlas.camerasdecoded.com">atlas.camerasdecoded.com</a><br>
-    © Cameras Decoded — Operator Confidence Curriculum
-  </div>
+    <!-- Article Grid -->
+    <div class="article-grid" id="articleGrid"></div>
 
-</div>
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div>© 2026 Cameras Decoded. All rights reserved.</div>
+      <div class="socials">
+        <a href="https://www.youtube.com/@CamerasDecoded"><i class="fab fa-youtube"></i></a>
+        <a href="https://www.tiktok.com/@cameras.decoded"><i class="fab fa-tiktok"></i></a>
+        <a href="https://www.instagram.com/camerasdecoded/reels/"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.facebook.com/profile.php?id=61553594660326"><i class="fab fa-facebook-f"></i></a>
+        <a href="https://camerasdecoded.substack.com"><i class="fas fa-bookmark"></i></a>
+        <a href="https://podcasts.apple.com/us/podcast/cameras-decoded/idYOURID" target="_blank"><i class="fas fa-podcast"></i></a>
+      </div>
+      <div>© Cameras Decoded — The Entity transmits. The Signal Keeper builds. You decode.</div>
+      <div class="footer-links" style="margin-bottom: 10px;">
+        <a href="roadmap.html">Roadmap</a> · 
+        <a href="blog-updates.html">Blog/Updates</a> · 
+        <a href="faq.html">FAQ</a> · 
+        <a href="contact.html">Contact</a> · 
+        <a href="podcast.html">Podcast</a>
+      </div>
+      <div class="footer-links">
+        <a href="terms.html">Privacy/Terms</a>
+        <a href="mailto:signal@camerasdecoded.com">signal@camerasdecoded.com</a>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- FIREBASE SCRIPTS (load first) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-init.js"></script>
 
   <script>
+    // --- MOBILE MENU TOGGLE ---
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileToggle = document.getElementById('mobileToggle');
+      const floatingToggle = document.getElementById('floatingToggle');
+      const closeToggle = document.getElementById('closeToggle');
+      const overlay = document.getElementById('navGroupOverlay');
+
+      function openMenu() { overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+      function closeMenu() { overlay.classList.remove('open'); document.body.style.overflow = ''; }
+
+      if (mobileToggle) mobileToggle.addEventListener('click', (e) => { e.stopPropagation(); openMenu(); });
+      if (floatingToggle) floatingToggle.addEventListener('click', (e) => { e.stopPropagation(); openMenu(); });
+      if (closeToggle) closeToggle.addEventListener('click', (e) => { e.stopPropagation(); closeMenu(); });
+      if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeMenu(); });
+    });
+
+    // --- BINARY RAIN ---
+    (function() {
+      const canvas = document.getElementById('binary-rain');
+      const ctx = canvas.getContext('2d');
+      let width = window.innerWidth, height = window.innerHeight;
+      canvas.width = width; canvas.height = height;
+      const fontSize = 16;
+      const columns = Math.floor(width / fontSize);
+      const drops = Array(columns).fill(1);
+      const speed = 0.55;
+
+      function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, width, height);
+        ctx.font = fontSize + 'px "Space Mono", monospace';
+        ctx.textAlign = 'center';
+        for (let i = 0; i < drops.length; i++) {
+          const char = Math.random() > 0.5 ? '1' : '0';
+          const x = i * fontSize + fontSize / 2;
+          const y = drops[i] * fontSize;
+          if (char === '1') {
+            ctx.shadowColor = '#8deb00';
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = '#8deb00';
+          } else {
+            ctx.shadowColor = '#3a7a1a';
+            ctx.shadowBlur = 4;
+            ctx.fillStyle = '#4caf50';
+          }
+          ctx.fillText(char, x, y);
+          if (char === '1' && Math.random() < 0.025) {
+            ctx.shadowBlur = 15;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(x - 2, y - 8, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+          if (y > height && Math.random() > 0.97) drops[i] = 0;
+          drops[i] += speed;
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+      window.addEventListener('resize', () => {
+        width = window.innerWidth; height = window.innerHeight;
+        canvas.width = width; canvas.height = height;
+        const newColumns = Math.floor(width / fontSize);
+        if (newColumns > drops.length) drops.push(...Array(newColumns - drops.length).fill(1));
+        else drops.length = newColumns;
+      });
+    })();
+
+    // --- CART COUNTER ---
+    function getCart() { return JSON.parse(localStorage.getItem('cameras_decoded_cart') || '[]'); }
+    function updateCartUI() {
+      const cart = getCart();
+      const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+      const countEl = document.getElementById('cartHeaderCount');
+      const labelEl = document.getElementById('cartHeaderLabel');
+      if (countEl) {
+        countEl.textContent = totalItems;
+        countEl.style.display = totalItems > 0 ? 'inline-block' : 'none';
+      }
+      if (labelEl) {
+        labelEl.textContent = totalItems > 0 ? `Cart (${totalItems})` : 'Cart';
+      }
+    }
+    updateCartUI();
+
+    // --- FIREBASE + DASHBOARD LINK ---
+    const homeNav = document.querySelector('.sidebar .nav-item[href="index.html"]');
+    const mobileContainer = document.getElementById('mobileDashboardContainer');
+
+    function removeDashboardLink() {
+      const existingDesktop = document.getElementById('dynamic-dashboard-node');
+      if (existingDesktop) existingDesktop.remove();
+      const existingMobile = document.getElementById('mobile-dashboard-node');
+      if (existingMobile) existingMobile.remove();
+    }
+
+    function insertDashboardLink(dashboardUrl) {
+      if (homeNav && homeNav.parentNode) {
+        const existing = document.getElementById('dynamic-dashboard-node');
+        if (existing) existing.remove();
+        const dashLink = document.createElement('a');
+        dashLink.id = 'dynamic-dashboard-node';
+        dashLink.className = 'nav-item';
+        dashLink.innerHTML = '<i class="fas fa-chart-simple"></i> Dashboard';
+        dashLink.href = dashboardUrl;
+        homeNav.parentNode.insertBefore(dashLink, homeNav);
+      }
+
+      if (mobileContainer) {
+        const existing = document.getElementById('mobile-dashboard-node');
+        if (existing) existing.remove();
+        const dashLink = document.createElement('a');
+        dashLink.id = 'mobile-dashboard-node';
+        dashLink.className = 'nav-item dashboard-link';
+        dashLink.innerHTML = '<i class="fas fa-chart-simple"></i> Dashboard';
+        dashLink.href = dashboardUrl;
+        mobileContainer.appendChild(dashLink);
+      }
+    }
+
+    if (typeof auth !== 'undefined' && auth) {
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          localStorage.setItem('cameras_decoded_uid', user.uid);
+          if (typeof db !== 'undefined' && db) {
+            db.collection('users').doc(user.uid).get().then((doc) => {
+              if (doc.exists) {
+                const role = doc.data().role || 'Operator';
+                let dashboardUrl = 'operator-dashboard.html';
+                if (role === 'Instructor') dashboardUrl = 'instructor-dashboard.html';
+                else if (role === 'Operator') dashboardUrl = 'operator-dashboard.html';
+                else if (role === 'Partner') dashboardUrl = 'partner-dashboard.html';
+                insertDashboardLink(dashboardUrl);
+              } else {
+                insertDashboardLink('operator-dashboard.html');
+              }
+            }).catch(() => {
+              insertDashboardLink('operator-dashboard.html');
+            });
+          } else {
+            insertDashboardLink('operator-dashboard.html');
+          }
+        } else {
+          localStorage.removeItem('cameras_decoded_uid');
+          removeDashboardLink();
+        }
+      });
+    }
+
+    // --- SCROLL TO TOP ---
+    window.onscroll = function() {
+      const btn = document.getElementById('scrollTopBtn');
+      if (!btn) return;
+      const show = document.body.scrollTop > 400 || document.documentElement.scrollTop > 400;
+      if (show) {
+        btn.classList.add('show');
+        requestAnimationFrame(() => btn.classList.add('pulse'));
+      } else {
+        btn.classList.remove('show', 'pulse');
+      }
+    };
+
+    // --- OPTOKEN CAPTURE (from URL) ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('opToken');
+      if (token) {
+        localStorage.setItem('cameras_decoded_uid', token);
+      }
+    });
+
+    // --- DECODER ATLAS DATA & RENDERING ---
     const articles = [
-      // --- Sony A7IV ---
+      // Sony A7IV
       { camera: "Sony A7IV", scenario: "Portrait", lighting: "Low Light", slug: "sony-a7iv-portrait-low-light", difficulty: "Intermediate" },
       { camera: "Sony A7IV", scenario: "Portrait", lighting: "Bright Natural", slug: "sony-a7iv-portrait-bright-natural", difficulty: "Beginner" },
       { camera: "Sony A7IV", scenario: "Portrait", lighting: "Golden Hour", slug: "sony-a7iv-portrait-golden-hour", difficulty: "Beginner" },
@@ -364,8 +931,7 @@
       { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Indoor Artificial", slug: "sony-a7iv-real-estate-indoor-artificial", difficulty: "Beginner" },
       { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Overcast", slug: "sony-a7iv-real-estate-overcast", difficulty: "Beginner" },
       { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Golden Hour", slug: "sony-a7iv-real-estate-golden-hour", difficulty: "Beginner" },
-
-      // --- Canon R6 Mark II ---
+      // Canon R6 Mark II
       { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Golden Hour", slug: "canon-r6-markii-portrait-golden-hour", difficulty: "Beginner" },
       { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Low Light", slug: "canon-r6-markii-portrait-low-light", difficulty: "Intermediate" },
       { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Bright Natural", slug: "canon-r6-markii-portrait-bright-natural", difficulty: "Beginner" },
@@ -386,8 +952,7 @@
       { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Indoor Artificial", slug: "canon-r6-markii-real-estate-indoor-artificial", difficulty: "Beginner" },
       { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Overcast", slug: "canon-r6-markii-real-estate-overcast", difficulty: "Beginner" },
       { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Golden Hour", slug: "canon-r6-markii-real-estate-golden-hour", difficulty: "Beginner" },
-
-      // --- Fujifilm X-T5 ---
+      // Fujifilm X-T5
       { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Golden Hour", slug: "fujifilm-x-t5-portrait-golden-hour", difficulty: "Intermediate" },
       { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Low Light", slug: "fujifilm-x-t5-portrait-low-light", difficulty: "Intermediate" },
       { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Bright Natural", slug: "fujifilm-x-t5-portrait-bright-natural", difficulty: "Beginner" },
@@ -407,8 +972,7 @@
       { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Indoor Artificial", slug: "fujifilm-x-t5-real-estate-indoor-artificial", difficulty: "Beginner" },
       { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Low Light", slug: "fujifilm-x-t5-real-estate-low-light", difficulty: "Intermediate" },
       { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Overcast", slug: "fujifilm-x-t5-real-estate-overcast", difficulty: "Beginner" },
-
-      // --- Nikon Z6 III ---
+      // Nikon Z6 III
       { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Golden Hour", slug: "nikon-z6-iii-portrait-golden-hour", difficulty: "Intermediate" },
       { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Low Light", slug: "nikon-z6-iii-portrait-low-light", difficulty: "Intermediate" },
       { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Bright Natural", slug: "nikon-z6-iii-portrait-bright-natural", difficulty: "Beginner" },
@@ -429,8 +993,7 @@
       { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Indoor Artificial", slug: "nikon-z6-iii-real-estate-indoor-artificial", difficulty: "Beginner" },
       { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Overcast", slug: "nikon-z6-iii-real-estate-overcast", difficulty: "Beginner" },
       { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Golden Hour", slug: "nikon-z6-iii-real-estate-golden-hour", difficulty: "Beginner" },
-
-      // --- Sony A6700 ---
+      // Sony A6700
       { camera: "Sony A6700", scenario: "Portrait", lighting: "Bright Natural", slug: "sony-a6700-portrait-bright-natural", difficulty: "Beginner" },
       { camera: "Sony A6700", scenario: "Portrait", lighting: "Golden Hour", slug: "sony-a6700-portrait-golden-hour", difficulty: "Beginner" },
       { camera: "Sony A6700", scenario: "Portrait", lighting: "Low Light", slug: "sony-a6700-portrait-low-light", difficulty: "Intermediate" },
@@ -452,19 +1015,12 @@
       { camera: "Sony A6700", scenario: "Real Estate", lighting: "Overcast", slug: "sony-a6700-real-estate-overcast", difficulty: "Beginner" }
     ];
 
-    // --- SPONSORSHIP CONFIG ---
-    // To sell a brand section, fill in that brand's entry below — the credit
-    // line appears automatically. Leave it as `null` for an unsponsored
-    // section (renders as a clean header with no placeholder, so unsold
-    // sections never look empty or broken).
     const brandSponsors = {
       "Sony": null,
       "Canon": null,
       "Fujifilm": null,
       "Nikon": null
     };
-    // Example of an active sponsorship:
-    // "Sony": { name: "B&H Photo", url: "https://www.bhphotovideo.com" },
 
     function getBrand(cameraName) {
       return cameraName.split(' ')[0];
@@ -478,9 +1034,6 @@
         return;
       }
 
-      // Group by brand regardless of order in the underlying data — this
-      // guarantees one contiguous section per brand (e.g. Sony A7IV and
-      // Sony A6700 together) even though they aren't adjacent in the array.
       const groups = {};
       filtered.forEach(article => {
         const brand = getBrand(article.camera);
@@ -536,17 +1089,8 @@
 
     renderArticles(articles);
   </script>
-<!-- Step 2: Capture operator token from URL -->
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('opToken');
-    if (token) {
-      // Lock the token into the browser memory for this subdomain session
-      localStorage.setItem('cameras_decoded_uid', token);
-    }
-  });
-</script>
+
+  <button id="scrollTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'});">↑</button>
+
 </body>
-  <!-- Force rebuild -->
 </html>
