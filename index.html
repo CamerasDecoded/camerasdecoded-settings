@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="style.css" />
 
   <style>
-    /* Sidebar & main layout overrides (inherit from main site) */
+    /* --- GLOBAL LAYOUT (mirrors main site) --- */
     :root {
       --brand-green: #8deb00;
       --brand-green-glow: rgba(141, 235, 0, 0.15);
@@ -46,6 +46,7 @@
       pointer-events: none; z-index: 0;
     }
 
+    /* --- SIDEBAR --- */
     .sidebar {
       width: 240px;
       background: rgba(0,0,0,0.9);
@@ -55,6 +56,7 @@
       position: sticky; top: 0;
       flex-shrink: 0;
       z-index: 2;
+      overflow-y: auto;
     }
     .sidebar .logo img {
       display: block; height: 120px; width: auto;
@@ -91,6 +93,7 @@
     }
     .header-login-btn:hover { background: rgba(141,235,0,0.1); box-shadow: 0 0 15px rgba(141,235,0,0.3); }
 
+    /* --- MAIN CONTENT --- */
     .main-content {
       flex: 1;
       padding: 24px 40px 40px 40px;
@@ -102,6 +105,7 @@
     }
     @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
 
+    /* --- FLOATING HEADER --- */
     .floating-header {
       position: fixed; top: 12px; left: 240px; right: 0; z-index: 99;
       display: flex; align-items: center; gap: 20px; padding: 10px 24px;
@@ -149,7 +153,7 @@
     }
     .floating-toggle:hover { color: #a0f520; }
 
-    /* Atlas specific */
+    /* --- ATLAS SPECIFIC --- */
     .atlas-hero { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-dim); padding-bottom: 20px; }
     .atlas-hero h1 { font-size: 36px; background: linear-gradient(90deg, #1db31b 0%, #c9e265 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; letter-spacing: 1px; }
     .atlas-hero .subtitle { color: var(--text-muted); font-size: 16px; }
@@ -176,14 +180,6 @@
     .brand-divider:first-child { margin-top: 0; padding-top: 0; border-top: none; }
     .brand-divider .brand-name { font-family: 'Space Mono', monospace; font-size: 20px; color: var(--brand-green); }
     .brand-divider .brand-count { color: #666; font-size: 13px; margin-left: 8px; }
-    .sponsor-credit {
-      display: flex; align-items: center; gap: 8px; font-family: 'Space Mono', monospace;
-      font-size: 11px; color: #666; background: var(--bg-panel); border: 1px solid var(--border-dim);
-      border-radius: 20px; padding: 6px 14px; transition: 0.2s;
-    }
-    .sponsor-credit:hover { border-color: var(--brand-green); }
-    .sponsor-credit a { color: var(--brand-green); font-weight: 600; }
-    .sponsor-credit a:hover { text-decoration: underline; }
 
     .article-card {
       position: relative; background: var(--bg-panel); border: 1px solid var(--border-dim);
@@ -217,7 +213,7 @@
     .footer .footer-links a { color: var(--brand-green) !important; }
     .footer .footer-links a:hover { color: #a0f520 !important; }
 
-    /* Mobile */
+    /* --- MOBILE --- */
     @media (max-width: 1024px) {
       body { flex-direction: column; }
       .sidebar {
@@ -292,7 +288,7 @@
   <canvas id="binary-rain"></canvas>
   <div id="rain-fade"></div>
 
-  <!-- SIDEBAR (identical to main site but with subdomain links) -->
+  <!-- SIDEBAR – Full navigation, adapted for settings subdomain -->
   <aside class="sidebar">
     <div class="logo"><img src="cameras-decoded-logo.png" alt="Cameras Decoded" /></div>
     <div style="display:flex; gap:10px; align-items:center; margin-top:10px; margin-bottom:20px; align-self:flex-start;">
@@ -301,12 +297,21 @@
     </div>
     <div class="nav-group" id="navGroupDesktop">
       <!-- Dashboard link will be inserted here by JS (above Home) -->
-      <a href="index.html" class="nav-item active"><i class="fas fa-home"></i> Home</a>
-      <a href="cards.html" class="nav-item"><i class="fas fa-id-card"></i> Snapshot Cards</a>
-      <a href="protocols.html" class="nav-item"><i class="fas fa-code-branch"></i> Protocols</a>
-      <a href="collection.html" class="nav-item"><i class="fas fa-folder-open"></i> My Collection</a>
+      <a href="https://camerasdecoded.com" class="nav-item"><i class="fas fa-home"></i> Home</a>
+      <a href="https://camerasdecoded.com/operators.html" class="nav-item"><i class="fas fa-user-astronaut"></i> Operators</a>
+      <a href="https://camerasdecoded.com/community.html" class="nav-item"><i class="fas fa-users"></i> Community</a>
+      <a href="https://camerasdecoded.com/educators-pdf-viewer.html" class="nav-item"><i class="fas fa-chalkboard-teacher"></i> Instructors</a>
+      <a href="https://camerasdecoded.com/partners.html" class="nav-item"><i class="fas fa-handshake"></i> Partners</a>
       <hr class="sidebar-divider">
-      <a href="https://camerasdecoded.com" class="nav-item"><i class="fas fa-globe"></i> Main Site</a>
+      <a href="https://camerasdecoded.com/products.html" class="nav-item"><i class="fas fa-box-open"></i> Products</a>
+      <a href="https://camerasdecoded.com/protocols.html" class="nav-item"><i class="fas fa-code-branch"></i> Protocols</a>
+      <a href="index.html" class="nav-item active"><i class="fas fa-id-card"></i> Snapshot Cards</a>
+      <a href="https://camerasdecoded.com/cynetis-7.html" class="nav-item"><i class="fas fa-robot"></i> Cynetis-7</a>
+      <hr class="sidebar-divider">
+      <a href="https://camerasdecoded.com/blog-updates.html" class="nav-item"><i class="fas fa-newspaper"></i> Blog/Updates</a>
+      <a href="https://camerasdecoded.com/podcast.html" class="nav-item"><i class="fas fa-podcast"></i> Podcast</a>
+      <a href="https://camerasdecoded.com/inner-signal.html" class="nav-item"><i class="fas fa-brain"></i> Inner Signal</a>
+      <a href="https://camerasdecoded.com/about.html" class="nav-item"><i class="fas fa-info-circle"></i> About</a>
     </div>
     <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">☰</button>
   </aside>
@@ -314,23 +319,29 @@
   <!-- MOBILE OVERLAY -->
   <div class="nav-group-overlay" id="navGroupOverlay">
     <button class="close-btn" id="closeToggle">✕</button>
-    <a href="index.html" class="nav-item"><i class="fas fa-home"></i> Home</a>
-    <a href="cards.html" class="nav-item"><i class="fas fa-id-card"></i> Snapshot Cards</a>
-    <a href="protocols.html" class="nav-item"><i class="fas fa-code-branch"></i> Protocols</a>
-    <a href="collection.html" class="nav-item"><i class="fas fa-folder-open"></i> My Collection</a>
+    <a href="https://camerasdecoded.com" class="nav-item"><i class="fas fa-home"></i> Home</a>
+    <a href="https://camerasdecoded.com/operators.html" class="nav-item"><i class="fas fa-user-astronaut"></i> Operators</a>
+    <a href="https://camerasdecoded.com/community.html" class="nav-item"><i class="fas fa-users"></i> Community</a>
+    <a href="https://camerasdecoded.com/educators-pdf-viewer.html" class="nav-item"><i class="fas fa-chalkboard-teacher"></i> Instructors</a>
+    <a href="https://camerasdecoded.com/partners.html" class="nav-item"><i class="fas fa-handshake"></i> Partners</a>
     <hr class="sidebar-divider">
-    <a href="https://camerasdecoded.com" class="nav-item"><i class="fas fa-globe"></i> Main Site</a>
-    <!-- Dashboard link container (JS will insert above Home) -->
+    <a href="https://camerasdecoded.com/products.html" class="nav-item"><i class="fas fa-box-open"></i> Products</a>
+    <a href="https://camerasdecoded.com/protocols.html" class="nav-item"><i class="fas fa-code-branch"></i> Protocols</a>
+    <a href="index.html" class="nav-item"><i class="fas fa-id-card"></i> Snapshot Cards</a>
+    <a href="https://camerasdecoded.com/cynetis-7.html" class="nav-item"><i class="fas fa-robot"></i> Cynetis-7</a>
+    <hr class="sidebar-divider">
+    <a href="https://camerasdecoded.com/blog-updates.html" class="nav-item"><i class="fas fa-newspaper"></i> Blog/Updates</a>
+    <a href="https://camerasdecoded.com/podcast.html" class="nav-item"><i class="fas fa-podcast"></i> Podcast</a>
+    <a href="https://camerasdecoded.com/inner-signal.html" class="nav-item"><i class="fas fa-brain"></i> Inner Signal</a>
+    <a href="https://camerasdecoded.com/about.html" class="nav-item"><i class="fas fa-info-circle"></i> About</a>
     <div id="mobileDashboardContainer"></div>
   </div>
 
-  <!-- FLOATING HEADER -->
+  <!-- FLOATING HEADER – Home icon -> camerasdecoded.com, Daily Protocols link -->
   <div class="floating-header" id="floatingHeader">
-    <a href="index.html" class="floating-home-icon" title="Home"><i class="fas fa-home"></i></a>
+    <a href="https://camerasdecoded.com" class="floating-home-icon" title="Home"><i class="fas fa-home"></i></a>
     <div class="floating-nav-links">
-      <a href="cards.html">Snapshot Cards</a>
-      <a href="collection.html">My Collection</a>
-      <a href="https://camerasdecoded.com">Main Site</a>
+      <a href="https://camerasdecoded.com/onboarding.html">Daily Protocols</a>
     </div>
     <a href="cart.html" class="cart-header-link chasing-border" id="cartHeaderLink">
       <i class="fas fa-shopping-cart"></i> <span id="cartHeaderLabel">Cart</span>
@@ -397,7 +408,7 @@
 
   <button id="scrollTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'});">↑</button>
 
-  <!-- FIREBASE & UTILITIES -->
+  <!-- SCRIPTS -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -481,7 +492,7 @@
     updateCartUI();
 
     // --- Dashboard Link Insertion (using opToken or localStorage) ---
-    const homeNav = document.querySelector('.sidebar .nav-item[href="index.html"]');
+    const homeNav = document.querySelector('.sidebar .nav-item[href="https://camerasdecoded.com"]');
     const mobileContainer = document.getElementById('mobileDashboardContainer');
 
     function removeDashboardLink() {
@@ -531,7 +542,6 @@
       });
     }
 
-    // Check for opToken first, then fall back to auth.onAuthStateChanged
     (function initDashboardLink() {
       const params = new URLSearchParams(window.location.search);
       const opToken = params.get('opToken');
@@ -539,7 +549,6 @@
         localStorage.setItem('cameras_decoded_uid', opToken);
         tryDashboardFromUid(opToken);
       } else {
-        // Try Firebase Auth (may work in some browsers)
         if (typeof auth !== 'undefined' && auth) {
           auth.onAuthStateChanged((user) => {
             if (user) {
@@ -558,7 +567,7 @@
       }
     })();
 
-    // --- Articles Data (slugs now match actual card page filenames) ---
+    // --- Articles Data (slugs match your actual card page filenames) ---
     const articles = [
       // Sony A7IV
       { camera: "Sony A7IV", scenario: "Portrait", lighting: "Low Light", slug: "sony-a7iv-portrait-low-light", difficulty: "Intermediate" },
@@ -581,7 +590,7 @@
       { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Indoor Artificial", slug: "sony-a7iv-real-estate-indoor-artificial", difficulty: "Beginner" },
       { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Overcast", slug: "sony-a7iv-real-estate-overcast", difficulty: "Beginner" },
       { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Golden Hour", slug: "sony-a7iv-real-estate-golden-hour", difficulty: "Beginner" },
-      // Canon R6 Mark II (now using the actual slug pattern from your card pages)
+      // Canon R6 Mark II
       { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Golden Hour", slug: "canon-r6ii-portrait-golden-hour", difficulty: "Beginner" },
       { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Low Light", slug: "canon-r6ii-portrait-low-light", difficulty: "Intermediate" },
       { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Bright Natural", slug: "canon-r6ii-portrait-bright-natural", difficulty: "Beginner" },
@@ -684,7 +693,6 @@
 
       Object.keys(groups).sort().forEach(brand => {
         const items = groups[brand];
-
         const divider = document.createElement('div');
         divider.className = 'brand-divider';
         divider.innerHTML = `
