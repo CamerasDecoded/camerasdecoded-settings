@@ -119,7 +119,7 @@
     .floating-header a { color: var(--brand-green); transition: color 0.2s; }
     .floating-header a:hover { color: #a0f520; }
     .floating-home-icon { font-size: 17px; flex-shrink: 0; }
-    .floating-nav-links { display: flex; flex: 1; justify-content: center; gap: 25px; flex-wrap: wrap; align-items: center; }
+    .floating-nav-links { display: flex; flex: 1; justify-content: center; gap: 30px; flex-wrap: wrap; align-items: center; }
 
     @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
     @keyframes spinBorder { to { --angle: 360deg; } }
@@ -154,9 +154,87 @@
     .floating-toggle:hover { color: #a0f520; }
 
     /* --- ATLAS SPECIFIC --- */
-    .atlas-hero { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-dim); padding-bottom: 20px; }
+    .atlas-hero { text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-dim); padding-bottom: 20px; }
     .atlas-hero h1 { font-size: 36px; background: linear-gradient(90deg, #1db31b 0%, #c9e265 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; letter-spacing: 1px; }
     .atlas-hero .subtitle { color: var(--text-muted); font-size: 16px; }
+
+    /* ----- SCROLL CUE & DAILY PROTOCOL CTA (from main site) ----- */
+    .scroll-cue {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 0;
+      color: var(--brand-green);
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.75;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 10px;
+    }
+    .scroll-cue i {
+      font-size: 24px;
+      animation: scrollBounce 1.8s ease-in-out infinite;
+    }
+    @keyframes scrollBounce {
+      0%, 100% { transform: translateY(0); opacity: 0.5; }
+      50% { transform: translateY(12px); opacity: 1; }
+    }
+    .onboarding-cta-wrapper {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0 40px 0;
+      padding: 6px 0;
+      position: relative;
+      z-index: 2;
+    }
+    .btn-onboarding {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 16px 6px 20px;
+      background: transparent;
+      border: 1px solid rgba(141, 235, 0, 0.3);
+      border-radius: 30px;
+      color: var(--brand-green);
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 400;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(4px);
+    }
+    .btn-onboarding i {
+      font-size: 12px;
+      transition: transform 0.3s ease;
+      opacity: 0.7;
+    }
+    .btn-onboarding:hover {
+      border-color: var(--brand-green);
+      background: rgba(141, 235, 0, 0.08);
+      box-shadow: 0 0 30px rgba(141, 235, 0, 0.15);
+      gap: 14px;
+    }
+    .btn-onboarding:hover i {
+      transform: translateX(4px);
+      opacity: 1;
+    }
+    /* ---- SCROLL-REVEAL ANIMATIONS ---- */
+    .reveal-on-scroll {
+      opacity: 0;
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), 
+                  transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(50px);
+    }
+    .reveal-on-scroll.revealed {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .reveal-delay-1 { transition-delay: 0.08s; }
 
     .search-box { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
     .search-box input, .search-box select {
@@ -229,11 +307,19 @@
       .floating-toggle { display: block !important; }
       .main-content { padding: 20px; padding-top: 100px; }
       .floating-header { left: 10px; right: 10px; top: 70px; padding: 8px 18px; border-radius: 25px; gap: 10px; }
-      .floating-nav-links { gap: 12px; }
+      .floating-nav-links { gap: 20px; }
       #cartHeaderLabel { display: none; }
       .atlas-hero h1 { font-size: 28px; }
       .search-box { flex-direction: column; }
       .article-grid { grid-template-columns: 1fr; }
+      .onboarding-cta-wrapper { margin: 5px 0 30px 0; }
+    }
+
+    @media (max-width: 500px) {
+      .btn-onboarding { font-size: 12px; padding: 4px 14px 4px 16px; }
+      .btn-onboarding:hover { gap: 10px; }
+      .scroll-cue { font-size: 10px; }
+      .scroll-cue i { font-size: 16px; }
     }
 
     .nav-group-overlay {
@@ -288,7 +374,7 @@
   <canvas id="binary-rain"></canvas>
   <div id="rain-fade"></div>
 
-  <!-- SIDEBAR – Full navigation, adapted for settings subdomain -->
+  <!-- SIDEBAR (unchanged, full main site navigation) -->
   <aside class="sidebar">
     <div class="logo"><img src="cameras-decoded-logo.png" alt="Cameras Decoded" /></div>
     <div style="display:flex; gap:10px; align-items:center; margin-top:10px; margin-bottom:20px; align-self:flex-start;">
@@ -296,7 +382,7 @@
       <a href="https://camerasdecoded.com/signup.html" class="header-login-btn">Sign Up</a>
     </div>
     <div class="nav-group" id="navGroupDesktop">
-      <!-- Dashboard link will be inserted here by JS (above Home) -->
+      <!-- Dashboard link inserted by JS above Home -->
       <a href="https://camerasdecoded.com" class="nav-item"><i class="fas fa-home"></i> Home</a>
       <a href="https://camerasdecoded.com/operators.html" class="nav-item"><i class="fas fa-user-astronaut"></i> Operators</a>
       <a href="https://camerasdecoded.com/community.html" class="nav-item"><i class="fas fa-users"></i> Community</a>
@@ -337,13 +423,13 @@
     <div id="mobileDashboardContainer"></div>
   </div>
 
-  <!-- FLOATING HEADER – Home icon -> camerasdecoded.com, Daily Protocols link -->
+  <!-- FLOATING HEADER – Home -> main site, three nav links -->
   <div class="floating-header" id="floatingHeader">
     <a href="https://camerasdecoded.com" class="floating-home-icon" title="Home"><i class="fas fa-home"></i></a>
     <div class="floating-nav-links">
       <a href="https://camerasdecoded.com/operators.html">Operators</a>
       <a href="https://camerasdecoded.com/partners.html">Partners</a>
-      <a href="https://camerasdecoded.com/onboarding.html">Daily Protocols</a>
+      <a href="https://camerasdecoded.com/educators-pdf-viewer.html">Instructors</a>
     </div>
     <a href="cart.html" class="cart-header-link chasing-border" id="cartHeaderLink">
       <i class="fas fa-shopping-cart"></i> <span id="cartHeaderLabel">Cart</span>
@@ -358,6 +444,18 @@
     <div class="atlas-hero">
       <h1>🔍 Decoder Atlas</h1>
       <div class="subtitle">Free camera settings for mirrorless operators. Search by camera, scenario, or lighting condition.</div>
+    </div>
+
+    <!-- DAILY PROTOCOL CTA (from main site) – placed right below subtitle -->
+    <div class="scroll-cue reveal-on-scroll reveal-delay-1">
+      <span>See the signal in motion</span>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="onboarding-cta-wrapper reveal-on-scroll reveal-delay-1">
+      <a href="https://camerasdecoded.com/onboarding.html" class="btn-onboarding" target="_blank">
+        <span>Daily Protocol</span>
+        <i class="fas fa-arrow-right"></i>
+      </a>
     </div>
 
     <div class="search-box">
@@ -410,7 +508,7 @@
 
   <button id="scrollTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'});">↑</button>
 
-  <!-- SCRIPTS -->
+  <!-- FIREBASE & UTILITIES -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -568,6 +666,19 @@
         }
       }
     })();
+
+    // --- Scroll Reveal Observer (for the daily protocol CTA) ---
+    document.addEventListener('DOMContentLoaded', function() {
+      const revealEls = document.querySelectorAll('.reveal-on-scroll');
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -20px 0px' });
+      revealEls.forEach(el => revealObserver.observe(el));
+    });
 
     // --- Articles Data (slugs match your actual card page filenames) ---
     const articles = [
