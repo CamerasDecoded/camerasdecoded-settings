@@ -30,31 +30,6 @@
     .back-link { display: block; text-align: center; margin-top: 40px; color: #b4b4b4; text-decoration: none; font-size: 14px; }
     .back-link:hover { color: #8deb00; }
     .empty-state { text-align: center; padding: 60px 20px; color: #b4b4b4; font-family: 'Space Mono', monospace; grid-column: 1 / -1; }
-
-    /* ===== STICKY BACK TO DASHBOARD BUTTON ===== */
-    #sticky-dashboard-btn {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #0A0A0A;
-      border: 1px solid #8deb00;
-      color: #8deb00;
-      padding: 10px 24px;
-      border-radius: 30px;
-      z-index: 998;
-      font-family: 'Space Mono', monospace;
-      font-size: 14px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-      transition: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      text-decoration: none;
-      display: inline-block;
-    }
-    #sticky-dashboard-btn:hover {
-      background: #8deb00;
-      color: #000000;
-      transform: translateX(-50%) scale(1.04);
-    }
   </style>
 </head>
 <body>
@@ -73,9 +48,6 @@
     <a href="https://camerasdecoded.com/operator-dashboard.html" id="backToDashboardLink" class="back-link" style="margin-top: 10px;">🖥️ Back to Dashboard</a>
   </div>
 </div>
-
-<!-- STICKY BACK TO DASHBOARD (visible on all screen sizes) -->
-<a href="https://camerasdecoded.com/operator-dashboard.html" id="sticky-dashboard-btn">← Back to Dashboard</a>
 
 <!-- FIREBASE UTILITY LIBRARIES -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -139,17 +111,14 @@
         const data = doc.data();
         const savedIds = data.savedCards || [];
 
-        // Update BOTH dashboard links (bottom link + sticky button)
-        const role = data.role || 'Operator';
-        let dashboardUrl = 'https://camerasdecoded.com/operator-dashboard.html';
-        if (role === 'Instructor') dashboardUrl = 'https://camerasdecoded.com/instructor-dashboard.html';
-        else if (role === 'Partner') dashboardUrl = 'https://camerasdecoded.com/partner-dashboard.html';
-        else dashboardUrl = 'https://camerasdecoded.com/operator-dashboard.html';
-
-        const bottomLink = document.getElementById('backToDashboardLink');
-        const stickyBtn = document.getElementById('sticky-dashboard-btn');
-        if (bottomLink) bottomLink.href = dashboardUrl;
-        if (stickyBtn) stickyBtn.href = dashboardUrl;
+        // Dynamically set the "Back to Dashboard" link based on role
+        const dashboardLink = document.getElementById('backToDashboardLink');
+        if (dashboardLink) {
+          const role = data.role || 'Operator';
+          if (role === 'Instructor') dashboardLink.href = 'https://camerasdecoded.com/instructor-dashboard.html';
+          else if (role === 'Partner') dashboardLink.href = 'https://camerasdecoded.com/partner-dashboard.html';
+          else dashboardLink.href = 'https://camerasdecoded.com/operator-dashboard.html';
+        }
 
         if (savedIds.length === 0) {
           grid.innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
