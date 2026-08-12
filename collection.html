@@ -19,7 +19,6 @@
     .collection-card a.card-main-link { text-decoration: none; color: #ffffff; display: block; flex-grow: 1; }
     .collection-card .camera { color: #8deb00; font-family: 'Space Mono', monospace; font-size: 14px; margin-top: 10px; margin-bottom: 15px; text-transform: uppercase; }
     
-    /* Style for the newly added custom Remove button */
     .remove-card-btn {
       background: transparent; border: 1px solid #333; color: #888;
       font-family: 'Space Mono', monospace; font-size: 10px; padding: 4px 10px;
@@ -31,6 +30,31 @@
     .back-link { display: block; text-align: center; margin-top: 40px; color: #b4b4b4; text-decoration: none; font-size: 14px; }
     .back-link:hover { color: #8deb00; }
     .empty-state { text-align: center; padding: 60px 20px; color: #b4b4b4; font-family: 'Space Mono', monospace; grid-column: 1 / -1; }
+
+    /* ===== STICKY BACK TO DASHBOARD BUTTON ===== */
+    #sticky-dashboard-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0A0A0A;
+      border: 1px solid #8deb00;
+      color: #8deb00;
+      padding: 10px 24px;
+      border-radius: 30px;
+      z-index: 998;
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+      transition: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-decoration: none;
+      display: inline-block;
+    }
+    #sticky-dashboard-btn:hover {
+      background: #8deb00;
+      color: #000000;
+      transform: translateX(-50%) scale(1.04);
+    }
   </style>
 </head>
 <body>
@@ -41,7 +65,6 @@
   </div>
 
   <div id="collectionGrid" class="collection-grid">
-    <!-- Cards will be dynamically loaded here by JavaScript -->
     <div class="empty-state">Establishing secure signal link...</div>
   </div>
 
@@ -51,6 +74,9 @@
   </div>
 </div>
 
+<!-- STICKY BACK TO DASHBOARD (visible on all screen sizes) -->
+<a href="https://camerasdecoded.com/operator-dashboard.html" id="sticky-dashboard-btn">← Back to Dashboard</a>
+
 <!-- FIREBASE UTILITY LIBRARIES -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -58,7 +84,7 @@
 <script src="cd-ui.js"></script>
 
 <script>
-  let db; // Global reference placeholder for data operations
+  let db;
 
   document.addEventListener('DOMContentLoaded', () => {
     const firebaseConfig = {
@@ -76,12 +102,6 @@
 
     const UID_KEY = 'cameras_decoded_uid';
 
-    // --- AUTH TOKEN BRIDGE ---
-    // Safari's ITP blocks the hidden-iframe mechanism Firebase Auth normally
-    // uses to share a session across subdomains, so we can't rely on
-    // firebase.auth() here. Instead, camerasdecoded.com passes the uid as
-    // ?opToken=... on any link into this subdomain; we capture it into this
-    // origin's own localStorage and use that as the source of truth.
     const params = new URLSearchParams(window.location.search);
     const token = params.get('opToken');
     if (token) {
@@ -100,11 +120,10 @@
     }
   });
 
-  // --- RENDERING LOOP ENGINE ---
   function loadUserCollectionGrid(uid) {
     const grid = document.getElementById('collectionGrid');
     const loadStartTime = Date.now();
-    const MIN_LOADING_MS = 1000; // keep "Establishing secure signal link..." readable even on fast connections
+    const MIN_LOADING_MS = 1000;
 
     function afterMinimumDelay(callback) {
       const elapsed = Date.now() - loadStartTime;
@@ -114,20 +133,23 @@
 
     db.collection('users').doc(uid).get().then((doc) => {
       afterMinimumDelay(() => {
-      grid.innerHTML = ''; // Wipe loader text values pristine
+      grid.innerHTML = '';
 
       if (doc.exists) {
         const data = doc.data();
         const savedIds = data.savedCards || [];
 
-        // Route "Back to Dashboard" to the correct dashboard for this user's role
-        const dashboardLink = document.getElementById('backToDashboardLink');
-        if (dashboardLink) {
-          const role = data.role || 'Operator';
-          if (role === 'Instructor') dashboardLink.href = 'https://camerasdecoded.com/instructor-dashboard.html';
-          else if (role === 'Partner') dashboardLink.href = 'https://camerasdecoded.com/partner-dashboard.html';
-          else dashboardLink.href = 'https://camerasdecoded.com/operator-dashboard.html';
-        }
+        // Update BOTH dashboard links (bottom link + sticky button)
+        const role = data.role || 'Operator';
+        let dashboardUrl = 'https://camerasdecoded.com/operator-dashboard.html';
+        if (role === 'Instructor') dashboardUrl = 'https://camerasdecoded.com/instructor-dashboard.html';
+        else if (role === 'Partner') dashboardUrl = 'https://camerasdecoded.com/partner-dashboard.html';
+        else dashboardUrl = 'https://camerasdecoded.com/operator-dashboard.html';
+
+        const bottomLink = document.getElementById('backToDashboardLink');
+        const stickyBtn = document.getElementById('sticky-dashboard-btn');
+        if (bottomLink) bottomLink.href = dashboardUrl;
+        if (stickyBtn) stickyBtn.href = dashboardUrl;
 
         if (savedIds.length === 0) {
           grid.innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
@@ -137,9 +159,8 @@
         savedIds.forEach(id => {
           const cardNode = document.createElement('div');
           cardNode.className = 'collection-card';
-          cardNode.id = `wrapper-${id}`; // Dynamic targeting id descriptor
+          cardNode.id = `wrapper-${id}`;
           
-          // Re-format string keys to pretty text layout formats
           const displayName = id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
           
           cardNode.innerHTML = `
@@ -165,22 +186,18 @@
     });
   }
 
-  // --- THE MASTER DELETION OPERATION ---
   function removeCardFromCollection(cardId, uid) {
     cdConfirm("Remove this card from your collection?").then((confirmed) => {
       if (!confirmed) return;
 
-      // Atomically removes just this one entry from the array field
       db.collection('users').doc(uid).update({
         savedCards: firebase.firestore.FieldValue.arrayRemove(cardId)
       })
       .then(() => {
-        // Success: Animation removal sweep execution from user display view elements
         const activeVisualNode = document.getElementById(`wrapper-${cardId}`);
         if (activeVisualNode) {
           activeVisualNode.remove();
 
-          // Double-check element volume count. If empty, write fallback notice
           const remainingBlocks = document.querySelectorAll('.collection-card');
           if (remainingBlocks.length === 0) {
             document.getElementById('collectionGrid').innerHTML = '<div class="empty-state">You haven\'t saved any cards yet. Explore the Atlas and click "Save to Collection" on any card.</div>';
