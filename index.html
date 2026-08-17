@@ -171,6 +171,7 @@
             flex: 1 1 auto;
             padding: 0 12px;
             min-width: 0;
+            gap: 8px;
         }
         .floating-title {
             font-family: 'Space Mono', monospace;
@@ -251,6 +252,18 @@
         }
         .floating-toggle:hover {
             color: #a0f520;
+        }
+
+        /* User badge in header */
+        .user-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            color: var(--text-muted);
+            background: var(--green-dim);
+            padding: 2px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(141, 235, 0, 0.15);
+            display: none;
         }
 
         /* ============================================================
@@ -415,11 +428,12 @@
             display: flex;
             flex-direction: column;
         }
+        /* Overlay at 80% dark = 20% background visibility */
         .tier-library::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.8); /* 80% opacity overlay, so background image shows at 20% */
+            background: rgba(0, 0, 0, 0.8);
             z-index: 0;
         }
         .tier-library>* {
@@ -457,7 +471,7 @@
             outline: none;
             min-width: 120px;
             transition: border-color 0.2s;
-            padding-right: 30px; /* extra padding for dropdown arrow */
+            padding-right: 30px;
         }
         .tier-library .tier-header .search-box input:focus,
         .tier-library .tier-header .search-box select:focus {
@@ -492,13 +506,14 @@
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 12px;
         }
+        /* Individual atlas cards are solid black */
         .atlas-item {
-            background: rgba(255, 255, 255, 0.02);
+            background: #0A0A0A;
             border: 1px solid var(--border-dim);
             border-radius: 8px;
             padding: 12px 14px;
             transition: border-color 0.2s, transform 0.1s;
-            cursor: default;
+            cursor: pointer;
         }
         .atlas-item:hover {
             border-color: var(--green);
@@ -508,6 +523,11 @@
             font-family: 'Space Mono', monospace;
             font-size: 12px;
             color: var(--green);
+        }
+        .atlas-item .card-link {
+            display: block;
+            color: #fff;
+            text-decoration: none;
         }
         .atlas-item .title {
             font-size: 13px;
@@ -641,9 +661,10 @@
             border-radius: 4px;
         }
 
+        /* Individual carousel cards are solid black */
         .carousel-card {
             flex: 0 0 160px;
-            background: rgba(255, 255, 255, 0.02);
+            background: #0A0A0A;
             border: 1px solid var(--border-dim);
             border-radius: 10px;
             padding: 12px;
@@ -851,11 +872,14 @@
             background: rgba(0, 0, 0, 0.3);
             color: var(--text-muted);
             font-size: 13px;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
+        }
+        .login-prompt.show {
+            display: flex;
         }
         .login-prompt i {
             color: var(--green-dim);
@@ -1087,6 +1111,10 @@
                 font-size: 12px;
                 padding: 8px 12px;
             }
+            .user-badge {
+                font-size: 8px;
+                padding: 1px 8px;
+            }
         }
 
         @media (min-width: 1025px) {
@@ -1216,8 +1244,7 @@
         </div>
         <div class="floating-center-group">
             <span class="floating-title"><strong>Snapshot</strong> Library</span>
-            <!-- User badge -->
-            <span id="userBadge" style="font-family:'Space Mono',monospace; font-size:9px; color:var(--text-muted); background:var(--green-dim); padding:2px 10px; border-radius:12px; border:1px solid rgba(141,235,0,0.15); margin-left:8px; display:none;">Free</span>
+            <span class="user-badge" id="userBadge">Free</span>
         </div>
         <div class="floating-right-group">
             <a href="https://camerasdecoded.com/cart.html" class="cart-header-link chasing-border" id="cartHeaderLink">
@@ -1247,7 +1274,7 @@
     <div class="main-wrapper">
 
         <!-- ===== COMPACT LOGIN PROMPT ===== -->
-        <div id="loginPrompt" class="login-prompt" style="display:none;">
+        <div class="login-prompt" id="loginPrompt">
             <i class="fas fa-lock"></i>
             <span>Please <a href="https://camerasdecoded.com/login.html">log in</a> to save cards and manage your library.</span>
         </div>
@@ -1917,10 +1944,12 @@
                     const div = document.createElement('div');
                     div.className = 'atlas-item';
                     div.innerHTML = `
-                        <div class="camera">${article.camera}</div>
-                        <div class="title">${article.scenario} — ${article.lighting}</div>
-                        <div class="meta">${article.difficulty}</div>
-                        <button class="save-btn ${isSaved ? 'saved' : ''}" onclick="saveAtlasCard('${article.slug}', '${article.camera} — ${article.scenario}')" ${isSaved ? 'disabled' : ''}>
+                        <a href="${article.slug}.html" class="card-link">
+                            <div class="camera">${article.camera}</div>
+                            <div class="title">${article.scenario} — ${article.lighting}</div>
+                            <div class="meta">${article.difficulty}</div>
+                        </a>
+                        <button class="save-btn ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); saveAtlasCard('${article.slug}', '${article.camera} — ${article.scenario}')" ${isSaved ? 'disabled' : ''}>
                             ${isSaved ? '<i class="fas fa-check"></i> Saved' : '<i class="fas fa-plus"></i> Save'}
                         </button>
                     `;
@@ -2022,7 +2051,7 @@
                     }
                 }).catch(console.warn);
 
-                loginPrompt.style.display = 'none';
+                loginPrompt.classList.remove('show');
 
                 if (unsubscribe) unsubscribe();
                 unsubscribe = userDocRef.onSnapshot(doc => {
@@ -2075,7 +2104,7 @@
                 sidebarEmail.textContent = '';
                 renderSavedCards([]);
                 renderAtlas(filterAtlas());
-                loginPrompt.style.display = 'flex';
+                loginPrompt.classList.add('show');
             }
         });
 
@@ -2083,7 +2112,7 @@
         // INIT
         // ============================================================
         renderAtlas(articles);
-        console.log('📦 Snapshot Library ready.');
+        console.log('📦 Snapshot Library ready. All cards are clickable links.');
     </script>
 
     <!-- Toast container -->
