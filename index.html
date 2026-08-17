@@ -1,867 +1,1869 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Decoder Atlas — Cameras Decoded</title>
-  <meta name="description" content="Free camera settings for Sony, Canon, Nikon, and Fuji mirrorless cameras. Search by camera, scenario, or lighting condition." />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snapshot Library — Cameras Decoded</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <style>
-    /* --- GLOBAL LAYOUT (mirrors main site) --- */
-    :root {
-      --brand-green: #8deb00;
-      --brand-green-glow: rgba(141, 235, 0, 0.15);
-      --text-main: #ffffff;
-      --text-muted: #b4b4b4;
-      --bg-black: #000000;
-      --bg-panel: #0A0A0A;
-      --border-dim: #1A1A1A;
-    }
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js">
+    </script>
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background-color: var(--bg-black);
-      background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 24px 24px;
-      color: var(--text-main);
-      font-family: 'Montserrat', sans-serif;
-      line-height: 1.6;
-      display: flex;
-      min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
-      /* --- FIXES --- */
-      max-width: none;   /* override style.css */
-      margin: 0;         /* override style.css */
-      padding: 0;        /* override style.css's padding: 40px 20px */
-    }
+    <style>
+        /* ============================================================
+           ROOT & RESET
+           ============================================================ */
+        :root {
+            --green: #8deb00;
+            --green-dim: rgba(141, 235, 0, 0.12);
+            --text-muted: #b4b4b4;
+            --bg-panel: #0A0A0A;
+            --border-dim: #1A1A1A;
+            --gold: #e0b12d;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #050705;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(141, 235, 0, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(141, 235, 0, 0.08) 0%, transparent 45%),
+                linear-gradient(rgba(141, 235, 0, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(141, 235, 0, 0.04) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+            background-attachment: fixed;
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        h1,
+        h2,
+        h3,
+        .mono {
+            font-family: 'Space Mono', monospace;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: 0.2s;
+        }
+        button {
+            cursor: pointer;
+        }
 
-    #binary-rain {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      z-index: 0; pointer-events: none; opacity: 0.2;
-    }
-    #rain-fade {
-      position: fixed; bottom: 0; left: 0; width: 100vw; height: 45vh;
-      background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.85) 60%, #000000 100%);
-      pointer-events: none; z-index: 0;
-    }
+        /* ============================================================
+           BINARY RAIN
+           ============================================================ */
+        #binary-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.2;
+        }
+        #rain-fade {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            height: 45vh;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.85) 60%, #000000 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
 
-    /* --- SIDEBAR --- */
-    .sidebar {
-      width: 240px;
-      background: rgba(0,0,0,0.9);
-      padding: 32px 24px;
-      border-right: 1px solid var(--border-dim);
-      height: 100vh;
-      position: sticky; top: 0;
-      flex-shrink: 0;
-      z-index: 2;
-      overflow-y: auto;
-      /* Ensure no extra offset */
-      margin: 0;
-    }
-    .sidebar .logo img {
-      display: block; height: 120px; width: auto;
-    }
-    .sidebar .nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 0; color: var(--text-muted);
-      font-family: 'Space Mono', monospace; font-size: 13px;
-      letter-spacing: 0.5px; border-bottom: 1px solid transparent;
-      transition: all 0.2s;
-    }
-    .sidebar .nav-item i { font-size: 15px; width: 20px; text-align: center; transition: color 0.2s; color: inherit; }
-    .sidebar .nav-item:hover,
-    .sidebar .nav-item:hover i {
-      color: var(--brand-green);
-      transform: translateX(6px) scale(1.05);
-      text-shadow: 0 0 12px var(--brand-green-glow);
-      border-bottom: 1px solid var(--brand-green);
-    }
-    .sidebar .nav-item.active,
-    .sidebar .nav-item.active i {
-      color: var(--brand-green);
-      border-left: 2px solid var(--brand-green);
-      padding-left: 10px;
-      text-shadow: 0 0 12px var(--brand-green-glow);
-    }
-    .sidebar-divider { border: none; border-top: 1px solid var(--border-dim); margin: 8px 0; }
+        /* ============================================================
+           CHASING BORDER (cart)
+           ============================================================ */
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+        @keyframes spinBorder {
+            to {
+                --angle: 360deg;
+            }
+        }
+        .chasing-border {
+            position: relative;
+            border-color: transparent !important;
+            background-clip: padding-box;
+        }
+        .chasing-border::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: conic-gradient(from var(--angle), #8deb00, #00e5ff, #a0f520, #8deb00);
+            -webkit-mask: linear-gradient(black, black) content-box, linear-gradient(black, black) border-box;
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(black, black) content-box, linear-gradient(black, black) border-box;
+            mask-composite: exclude;
+            animation: spinBorder 4s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+            will-change: transform;
+        }
+        .chasing-border>* {
+            position: relative;
+            z-index: 1;
+        }
 
-    .header-login-btn {
-      display: block; color: var(--brand-green); font-family: 'Space Mono', monospace;
-      font-size: 12px; border: 1px solid var(--brand-green); padding: 0 10px 0 14px;
-      border-radius: 20px; background: transparent; transition: 0.2s; text-decoration: none;
-      text-align: center; width: fit-content;
-    }
-    .header-login-btn:hover { background: rgba(141,235,0,0.1); box-shadow: 0 0 15px rgba(141,235,0,0.3); }
+        /* ============================================================
+           FLOATING HEADER
+           ============================================================ */
+        .floating-header {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(141, 235, 0, 0.2);
+            border-radius: 30px;
+            margin: 0;
+            min-height: 40px;
+        }
+        .floating-header a {
+            color: var(--green);
+        }
+        .floating-left-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .floating-home-icon {
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        .floating-home-icon:hover {
+            color: #a0f520;
+        }
+        .floating-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--green);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 4px;
+            flex-shrink: 0;
+            margin-left: 2px;
+        }
+        .floating-toggle:hover {
+            color: #a0f520;
+        }
+        .floating-center-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1 1 auto;
+            padding: 0 12px;
+            min-width: 0;
+        }
+        .floating-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .floating-title strong {
+            color: var(--green);
+        }
+        .floating-right-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .cart-header-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: transparent;
+            border: 1px solid var(--green);
+            border-radius: 20px;
+            padding: 4px 10px;
+            color: var(--green);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            transition: 0.2s;
+            text-decoration: none;
+            min-height: 26px;
+            line-height: 1;
+        }
+        .cart-header-link:hover {
+            background: rgba(141, 235, 0, 0.1);
+            box-shadow: 0 0 12px rgba(141, 235, 0, 0.3);
+        }
+        .cart-count-badge {
+            background: var(--green);
+            color: #000;
+            border-radius: 50%;
+            padding: 0 5px;
+            font-size: 9px;
+            font-weight: 700;
+            display: inline-block;
+            min-width: 16px;
+            text-align: center;
+            line-height: 16px;
+        }
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--green);
+            color: var(--green);
+            padding: 4px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            white-space: nowrap;
+            transition: 0.2s;
+            min-height: 26px;
+            line-height: 1;
+        }
+        .logout-btn:hover {
+            background: rgba(141, 235, 0, 0.1);
+            box-shadow: 0 0 15px rgba(141, 235, 0, 0.3);
+        }
 
-    /* --- MAIN CONTENT --- */
-    .main-content {
-      flex: 1;
-      padding: 24px 40px 40px 40px;
-      padding-top: 80px;
-      max-width: 1200px;
-      position: relative;
-      z-index: 2;
-      animation: fadeIn 0.5s ease-in-out forwards;
-    }
-    @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        /* ============================================================
+           SIDEBAR (slide-in)
+           ============================================================ */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.97);
+            border-right: 1px solid var(--border-dim);
+            padding: 20px 16px 24px;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .sidebar .logo {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .sidebar .logo img {
+            height: 60px;
+            width: auto;
+        }
+        .sidebar-profile {
+            text-align: center;
+            padding: 12px 0 16px 0;
+            border-bottom: 1px solid var(--border-dim);
+            margin-bottom: 16px;
+        }
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            margin: 0 auto 8px auto;
+            position: relative;
+            border: 2px solid var(--green);
+            background-color: #1a1a1a;
+        }
+        .profile-avatar .upload-overlay {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            background: var(--bg-panel);
+            border-radius: 50%;
+            padding: 4px;
+            font-size: 12px;
+            border: 1px solid var(--border-dim);
+            color: var(--green);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            transition: 0.2s;
+        }
+        .profile-avatar .upload-overlay:hover {
+            background: var(--green);
+            color: #000;
+        }
+        .profile-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #fff;
+        }
+        .profile-email {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .profile-avatar input[type="file"] {
+            display: none;
+        }
 
-    /* --- FLOATING HEADER --- */
-    .floating-header {
-      position: fixed; top: 12px; left: 240px; right: 0; z-index: 99;
-      display: flex; align-items: center; gap: 20px; padding: 10px 24px;
-      background: rgba(0,0,0,0.25); backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(141,235,0,0.15); border-radius: 30px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      font-family: 'Space Mono', monospace; font-size: 13px;
-      color: var(--text-muted); margin: 0 12px;
-    }
-    .floating-header a { color: var(--brand-green); transition: color 0.2s; }
-    .floating-header a:hover { color: #a0f520; }
-    .floating-home-icon { font-size: 17px; flex-shrink: 0; }
-    .floating-nav-links { display: flex; flex: 1; justify-content: center; gap: 30px; flex-wrap: wrap; align-items: center; }
+        .sidebar-nav .nav-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-nav .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            color: var(--text-muted);
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .sidebar-nav .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .sidebar-nav .nav-item:hover {
+            color: var(--green);
+            background: rgba(141, 235, 0, 0.05);
+        }
+        .sidebar-nav .nav-item.active {
+            color: var(--green);
+            background: rgba(141, 235, 0, 0.08);
+        }
+        .sidebar-divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin: 8px 0;
+        }
+        .sidebar .sidebar-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 4px 8px;
+        }
+        .sidebar .sidebar-close:hover {
+            color: #fff;
+        }
 
-    @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-    @keyframes spinBorder { to { --angle: 360deg; } }
-    .chasing-border { position: relative; z-index: 0; }
-    .chasing-border::before {
-      content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
-      border-radius: inherit;
-      background: conic-gradient(from var(--angle, 0deg), #8deb00, #00e5ff, #a0f520, #8deb00);
-      animation: spinBorder 4s linear infinite;
-      z-index: -1;
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-              mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude;
-      padding: 2px;
-    }
+        .sidebar-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
 
-    .cart-header-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: transparent; border: 1px solid var(--brand-green); border-radius: 20px;
-      padding: 6px 14px; color: var(--brand-green); font-family: 'Space Mono', monospace;
-      font-size: 13px; transition: 0.2s; text-decoration: none; flex-shrink: 0;
-    }
-    .cart-header-link:hover { background: rgba(141,235,0,0.1); box-shadow: 0 0 12px rgba(141,235,0,0.3); }
-    .cart-count-badge { background: var(--brand-green); color: #000; border-radius: 50%; padding: 1px 7px; font-size: 11px; font-weight: 700; display: inline-block; }
+        /* ============================================================
+           MAIN WRAPPER
+           ============================================================ */
+        .main-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px 40px;
+            position: relative;
+            z-index: 1;
+        }
 
-    .floating-toggle {
-      display: none; background: transparent; border: none;
-      color: var(--brand-green); font-size: 24px; cursor: pointer;
-      padding: 0 6px; flex-shrink: 0; margin-left: 8px;
-    }
-    .floating-toggle:hover { color: #a0f520; }
+        /* ============================================================
+           TWO-TIER LAYOUT
+           ============================================================ */
+        .tier-container {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            margin-top: 8px;
+        }
 
-    /* --- ATLAS SPECIFIC --- */
-    .atlas-hero { text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-dim); padding-bottom: 20px; }
-    .atlas-hero h1 { font-size: 36px; background: linear-gradient(90deg, #1db31b 0%, #c9e265 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; letter-spacing: 1px; }
-    .atlas-hero .subtitle { color: var(--text-muted); font-size: 16px; }
+        /* ---- TIER 1: LIBRARY (browsable grid) ---- */
+        .tier-library {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-dim);
+            border-radius: 12px;
+            padding: 20px 20px 16px;
+            max-height: 460px;
+            display: flex;
+            flex-direction: column;
+        }
+        .tier-library .tier-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .tier-library .tier-header h2 {
+            font-family: 'Space Mono', monospace;
+            font-size: 16px;
+            color: var(--green);
+        }
+        .tier-library .tier-header .search-box {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .tier-library .tier-header .search-box input,
+        .tier-library .tier-header .search-box select {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-dim);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 12px;
+            font-family: 'Montserrat', sans-serif;
+            outline: none;
+            min-width: 120px;
+            transition: border-color 0.2s;
+        }
+        .tier-library .tier-header .search-box input:focus,
+        .tier-library .tier-header .search-box select:focus {
+            border-color: var(--green);
+        }
+        .tier-library .tier-header .search-box select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238deb00' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
 
-    /* ----- SCROLL CUE & DAILY PROTOCOL CTA (from main site) ----- */
-    .scroll-cue {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-      padding: 10px 0;
-      color: var(--brand-green);
-      font-family: 'Space Mono', monospace;
-      font-size: 14px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      opacity: 0.75;
-      position: relative;
-      z-index: 2;
-      margin-bottom: 10px;
-    }
-    .scroll-cue i {
-      font-size: 24px;
-      animation: scrollBounce 1.8s ease-in-out infinite;
-    }
-    @keyframes scrollBounce {
-      0%, 100% { transform: translateY(0); opacity: 0.5; }
-      50% { transform: translateY(12px); opacity: 1; }
-    }
-    .onboarding-cta-wrapper {
-      display: flex;
-      justify-content: center;
-      margin: 10px 0 40px 0;
-      padding: 6px 0;
-      position: relative;
-      z-index: 2;
-    }
-    .btn-onboarding {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 6px 16px 6px 20px;
-      background: transparent;
-      border: 1px solid rgba(141, 235, 0, 0.3);
-      border-radius: 30px;
-      color: var(--brand-green);
-      font-family: 'Space Mono', monospace;
-      font-size: 13px;
-      font-weight: 400;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      letter-spacing: 0.5px;
-      backdrop-filter: blur(4px);
-    }
-    .btn-onboarding i {
-      font-size: 12px;
-      transition: transform 0.3s ease;
-      opacity: 0.7;
-    }
-    .btn-onboarding:hover {
-      border-color: var(--brand-green);
-      background: rgba(141, 235, 0, 0.08);
-      box-shadow: 0 0 30px rgba(141, 235, 0, 0.15);
-      gap: 14px;
-    }
-    .btn-onboarding:hover i {
-      transform: translateX(4px);
-      opacity: 1;
-    }
-    /* ---- SCROLL-REVEAL ANIMATIONS ---- */
-    .reveal-on-scroll {
-      opacity: 0;
-      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), 
-                  transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-      transform: translateY(50px);
-    }
-    .reveal-on-scroll.revealed {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-    .reveal-delay-1 { transition-delay: 0.08s; }
+        .library-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .library-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .library-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .library-scroll::-webkit-scrollbar-thumb {
+            background: var(--green-dim);
+            border-radius: 4px;
+        }
 
-    .search-box { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
-    .search-box input, .search-box select {
-      flex: 1; padding: 14px 18px; background: var(--bg-panel); border: 1px solid var(--border-dim);
-      border-radius: 8px; color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 14px;
-      min-width: 200px; outline: none; transition: border-color 0.2s;
-    }
-    .search-box select {
-      min-width: 150px; cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238deb00' stroke-width='2' fill='none'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 14px center; appearance: none;
-    }
-    .search-box input:focus, .search-box select:focus { border-color: var(--brand-green); }
+        .atlas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .atlas-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-dim);
+            border-radius: 8px;
+            padding: 12px 14px;
+            transition: border-color 0.2s, transform 0.1s;
+            cursor: default;
+        }
+        .atlas-item:hover {
+            border-color: var(--green);
+            transform: translateY(-2px);
+        }
+        .atlas-item .camera {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--green);
+        }
+        .atlas-item .title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 2px;
+            color: #fff;
+        }
+        .atlas-item .meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .atlas-item .save-btn {
+            margin-top: 8px;
+            padding: 2px 12px;
+            background: transparent;
+            border: 1px solid var(--green);
+            border-radius: 4px;
+            color: var(--green);
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .atlas-item .save-btn:hover {
+            background: rgba(141, 235, 0, 0.1);
+        }
+        .atlas-item .save-btn.saved {
+            border-color: var(--text-muted);
+            color: var(--text-muted);
+            cursor: default;
+        }
+        .atlas-item .save-btn.saved:hover {
+            background: transparent;
+        }
 
-    /* --- ARTICLE GRID (improved to minimum 2 columns) --- */
-    .article-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 24px;
-      margin-bottom: 40px;
-    }
-    .brand-divider {
-      grid-column: 1 / -1; display: flex; justify-content: space-between;
-      align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 36px;
-      padding-top: 24px; border-top: 1px solid var(--border-dim);
-    }
-    .brand-divider:first-child { margin-top: 0; padding-top: 0; border-top: none; }
-    .brand-divider .brand-name { font-family: 'Space Mono', monospace; font-size: 20px; color: var(--brand-green); }
-    .brand-divider .brand-count { color: #666; font-size: 13px; margin-left: 8px; }
+        .brand-label {
+            grid-column: 1 / -1;
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            color: var(--green);
+            padding: 8px 0 4px 0;
+            border-bottom: 1px solid var(--border-dim);
+            margin-bottom: 4px;
+        }
 
-    .article-card {
-      position: relative; background: var(--bg-panel); border: 1px solid var(--border-dim);
-      border-radius: 8px; padding: 20px 22px; transition: border-color 0.2s, transform 0.1s;
-    }
-    .article-card:hover { border-color: var(--brand-green); transform: translateY(-2px); }
-    .article-card::before {
-      content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 24px;
-      border-left: 2px solid var(--brand-green); border-top: 2px solid var(--brand-green);
-      border-radius: 6px 0 0 0; pointer-events: none;
-    }
-    .article-card::after {
-      content: ""; position: absolute; top: -4px; left: 8px; width: 6px; height: 6px;
-      background: var(--brand-green); border-radius: 50%;
-      box-shadow: 0 0 8px var(--brand-green); pointer-events: none;
-    }
-    .article-card a { text-decoration: none; color: var(--text-main); display: block; }
-    .article-card .camera { font-family: 'Space Mono', monospace; font-size: 14px; color: var(--brand-green); }
-    .article-card .title { font-size: 16px; font-weight: 600; margin-top: 4px; color: #ffffff; }
-    .article-card .meta { color: var(--text-muted); font-size: 13px; margin-top: 6px; }
+        /* ---- TIER 2: SAVED CARDS CAROUSEL ---- */
+        .tier-saved {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-dim);
+            border-radius: 12px;
+            padding: 20px 20px 16px;
+        }
+        .tier-saved .tier-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .tier-saved .tier-header h2 {
+            font-family: 'Space Mono', monospace;
+            font-size: 16px;
+            color: var(--green);
+        }
+        .tier-saved .tier-header .card-count {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .tier-saved .tier-header .add-card-btn {
+            padding: 4px 16px;
+            background: var(--green);
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tier-saved .tier-header .add-card-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(141, 235, 0, 0.3);
+        }
 
-    .footer {
-      border-top: 1px solid var(--border-dim); padding-top: 24px; margin-top: 64px;
-      display: flex; flex-direction: column; gap: 15px; font-size: 12px;
-      color: var(--text-muted); text-align: center;
-    }
-    .footer .socials { display: flex; justify-content: center; gap: 20px; }
-    .footer .socials a { color: #ffffff !important; font-size: 18px; transition: 0.2s; }
-    .footer .socials a:hover { color: var(--brand-green) !important; }
-    .footer .footer-links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-    .footer .footer-links a { color: var(--brand-green) !important; }
-    .footer .footer-links a:hover { color: #a0f520 !important; }
+        .carousel-wrapper {
+            position: relative;
+            overflow: hidden;
+            padding: 4px 0;
+        }
+        .carousel-track {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 8px 4px 16px 4px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: var(--green-dim) transparent;
+        }
+        .carousel-track::-webkit-scrollbar {
+            height: 4px;
+        }
+        .carousel-track::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .carousel-track::-webkit-scrollbar-thumb {
+            background: var(--green-dim);
+            border-radius: 4px;
+        }
 
-    /* --- MOBILE --- */
-    @media (max-width: 1024px) {
-      body { flex-direction: column; }
-      .sidebar {
-        width: 100%; height: auto; position: static;
-        border-right: none; border-bottom: 1px solid var(--border-dim);
-        padding: 15px 20px; display: flex; flex-wrap: wrap;
-        align-items: center; justify-content: space-between; flex-direction: row;
-      }
-      .sidebar .logo { margin: 0; }
-      .sidebar .logo img { height: 50px; width: auto; margin: 0; }
-      .sidebar .nav-group { display: none !important; }
-      .sidebar .mobile-toggle { display: block !important; background: transparent; border: none; color: var(--brand-green); font-size: 28px; cursor: pointer; padding: 4px 8px; z-index: 101; }
-      .floating-toggle { display: block !important; }
-      .main-content { padding: 20px; padding-top: 100px; max-width: 100%; }
-      .floating-header { left: 10px; right: 10px; top: 70px; padding: 8px 18px; border-radius: 25px; gap: 10px; }
-      .floating-nav-links { gap: 20px; }
-      #cartHeaderLabel { display: none; }
-      .atlas-hero h1 { font-size: 28px; }
-      .search-box { flex-direction: column; }
-      .article-grid { grid-template-columns: 1fr; }  /* mobile: one column */
-      .onboarding-cta-wrapper { margin: 5px 0 30px 0; }
-    }
+        .carousel-card {
+            flex: 0 0 160px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-dim);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            transition: border-color 0.2s, transform 0.2s;
+            position: relative;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-card:hover {
+            border-color: var(--green);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+        .carousel-card img {
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        .carousel-card .card-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #fff;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .carousel-card .card-id {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'Space Mono', monospace;
+            margin-top: 2px;
+        }
+        .carousel-card .remove-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: #ff4a4a;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 11px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .carousel-card:hover .remove-btn {
+            display: flex;
+        }
+        .carousel-card .remove-btn:hover {
+            background: #ff4a4a;
+            color: #000;
+        }
+        .carousel-card .empty-placeholder {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-style: italic;
+            padding: 20px 0;
+        }
+        .carousel-card .card-link {
+            display: block;
+            width: 100%;
+            height: 100%;
+            color: inherit;
+            text-decoration: none;
+        }
 
-    @media (max-width: 500px) {
-      .btn-onboarding { font-size: 12px; padding: 4px 14px 4px 16px; }
-      .btn-onboarding:hover { gap: 10px; }
-      .scroll-cue { font-size: 10px; }
-      .scroll-cue i { font-size: 16px; }
-    }
+        .carousel-nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .carousel-nav button {
+            background: transparent;
+            border: 1px solid var(--border-dim);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            color: var(--text-muted);
+            font-size: 14px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-nav button:hover {
+            border-color: var(--green);
+            color: var(--green);
+        }
 
-    .nav-group-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.85); z-index: 10000; flex-direction: column;
-      justify-content: center; align-items: center; gap: 12px; padding: 40px 20px;
-      overflow-y: auto;
-    }
-    .nav-group-overlay.open { display: flex !important; }
-    .nav-group-overlay .nav-item {
-      font-size: 22px; padding: 12px 0; color: #ffffff; font-family: 'Space Mono', monospace;
-      letter-spacing: 0.5px; width: 100%; max-width: 360px; text-align: center;
-      display: flex; align-items: center; justify-content: center; gap: 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.06); text-decoration: none;
-      transition: color 0.2s;
-    }
-    .nav-group-overlay .nav-item i { color: var(--brand-green); font-size: 18px; width: 28px; }
-    .nav-group-overlay .nav-item:hover { color: var(--brand-green); }
-    .nav-group-overlay .close-btn {
-      position: fixed; top: 20px; right: 20px; color: var(--brand-green);
-      font-size: 32px; cursor: pointer; background: transparent;
-      border: none; padding: 8px; z-index: 10001; font-family: 'Space Mono', monospace;
-    }
-    .nav-group-overlay .sidebar-divider { display: none; }
-    .sidebar .mobile-toggle { display: none; }
-    @media (min-width: 1025px) {
-      .sidebar .nav-group { display: flex !important; flex-direction: column !important; }
-    }
+        /* ============================================================
+           ADD CARD MODAL
+           ============================================================ */
+        .add-card-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .add-card-modal.open {
+            display: flex;
+        }
+        .add-card-modal .modal-content {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-dim);
+            border-radius: 12px;
+            padding: 28px 24px;
+            max-width: 420px;
+            width: 100%;
+            position: relative;
+        }
+        .add-card-modal .modal-content .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+        }
+        .add-card-modal .modal-content .close-modal:hover {
+            color: #fff;
+        }
+        .add-card-modal .modal-content h3 {
+            font-family: 'Space Mono', monospace;
+            color: var(--green);
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+        .add-card-modal .modal-content input {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-dim);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .add-card-modal .modal-content input:focus {
+            border-color: var(--green);
+        }
+        .add-card-modal .modal-content .btn-submit {
+            width: 100%;
+            padding: 10px;
+            background: var(--green);
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+        .add-card-modal .modal-content .btn-submit:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(141, 235, 0, 0.3);
+        }
+        .add-card-modal .modal-content .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .add-card-modal .modal-content .status-msg {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 10px;
+            text-align: center;
+        }
+        .add-card-modal .modal-content .status-msg.success {
+            color: var(--green);
+        }
+        .add-card-modal .modal-content .status-msg.error {
+            color: #ff4a4a;
+        }
 
-    #scrollTopBtn {
-      position: fixed; bottom: 30px; right: 30px;
-      visibility: hidden; opacity: 0;
-      width: 45px; height: 45px; border-radius: 50%;
-      border: 1px solid var(--brand-green); background: rgba(0,0,0,0.85);
-      color: var(--brand-green); cursor: pointer; font-size: 18px;
-      z-index: 999; font-family: 'Space Mono', monospace;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-      box-shadow: 0 0 10px rgba(141,235,0,0.2);
-    }
-    #scrollTopBtn.show { visibility: visible; opacity: 1; }
-    #scrollTopBtn:hover { background: var(--brand-green); color: #000000; box-shadow: 0 0 20px rgba(141,235,0,0.6); transform: translateY(-2px); }
-    @keyframes pulse {
-      0%   { transform: scale(1);   box-shadow: 0 0 10px rgba(141,235,0,0.2); }
-      50%  { transform: scale(1.15); box-shadow: 0 0 25px rgba(141,235,0,0.5); }
-      100% { transform: scale(1);   box-shadow: 0 0 10px rgba(141,235,0,0.2); }
-    }
-    #scrollTopBtn.pulse { animation: pulse 1.2s ease-in-out infinite; }
-  </style>
+        /* ============================================================
+           BACK LINK
+           ============================================================ */
+        .back-link-wrap {
+            margin-top: 24px;
+            text-align: center;
+        }
+        .back-link-wrap a {
+            color: var(--green);
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: gap 0.2s;
+        }
+        .back-link-wrap a:hover {
+            gap: 12px;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 1024px) {
+            .main-wrapper {
+                padding: 80px 16px 30px;
+            }
+            .tier-library {
+                max-height: 380px;
+            }
+            .atlas-grid {
+                grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .main-wrapper {
+                padding: 72px 12px 20px;
+            }
+            .floating-header {
+                padding: 4px 10px;
+                min-height: 32px;
+            }
+            .floating-title {
+                font-size: 10px;
+            }
+            .floating-toggle {
+                display: block !important;
+            }
+            .floating-center-group {
+                padding: 0 6px;
+            }
+            .cart-header-link {
+                font-size: 9px;
+                padding: 2px 6px;
+                min-height: 20px;
+            }
+            .cart-count-badge {
+                font-size: 8px;
+                min-width: 14px;
+                line-height: 14px;
+            }
+            .tier-library {
+                max-height: 340px;
+                padding: 14px 14px 10px;
+            }
+            .tier-library .tier-header .search-box input,
+            .tier-library .tier-header .search-box select {
+                font-size: 11px;
+                padding: 4px 10px;
+                min-width: 80px;
+            }
+            .atlas-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 8px;
+            }
+            .atlas-item {
+                padding: 10px;
+            }
+            .atlas-item .camera {
+                font-size: 10px;
+            }
+            .atlas-item .title {
+                font-size: 12px;
+            }
+            .atlas-item .meta {
+                font-size: 10px;
+            }
+            .atlas-item .save-btn {
+                font-size: 9px;
+                padding: 1px 10px;
+            }
+            .tier-saved {
+                padding: 14px 14px 10px;
+            }
+            .tier-saved .tier-header h2 {
+                font-size: 14px;
+            }
+            .tier-saved .tier-header .card-count {
+                font-size: 11px;
+            }
+            .tier-saved .tier-header .add-card-btn {
+                font-size: 11px;
+                padding: 3px 12px;
+            }
+            .carousel-card {
+                flex: 0 0 130px;
+                min-height: 150px;
+                padding: 10px;
+            }
+            .carousel-card img {
+                height: 70px;
+            }
+            .carousel-card .card-name {
+                font-size: 11px;
+            }
+            .carousel-card .card-id {
+                font-size: 9px;
+            }
+            .carousel-nav button {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            .sidebar {
+                width: 260px;
+            }
+            .add-card-modal .modal-content {
+                padding: 20px 16px;
+            }
+            .back-link-wrap a {
+                font-size: 12px;
+            }
+            .logout-btn {
+                display: none !important;
+            }
+        }
+
+        @media (min-width: 601px) {
+            .floating-toggle {
+                display: none !important;
+            }
+        }
+
+        /* ============================================================
+           UTILITY
+           ============================================================ */
+        .hidden {
+            display: none !important;
+        }
+        .text-muted {
+            color: var(--text-muted);
+        }
+        .text-green {
+            color: var(--green);
+        }
+    </style>
 </head>
 <body>
 
-  <canvas id="binary-rain"></canvas>
-  <div id="rain-fade"></div>
+    <!-- ===== BINARY RAIN ===== -->
+    <canvas id="binary-rain"></canvas>
+    <div id="rain-fade"></div>
 
-  <!-- SIDEBAR – Full navigation, adapted for settings subdomain -->
-  <aside class="sidebar">
-    <!-- Clickable logo linking back to main site -->
-    <div class="logo">
-      <a href="https://camerasdecoded.com"><img src="cameras-decoded-logo.png" alt="Cameras Decoded" /></a>
-    </div>
-    <div style="display:flex; gap:10px; align-items:center; margin-top:10px; margin-bottom:20px; align-self:flex-start;">
-      <a href="https://camerasdecoded.com/login.html" class="header-login-btn">Log in</a>
-      <a href="https://camerasdecoded.com/signup.html" class="header-login-btn">Sign Up</a>
-    </div>
-    <div class="nav-group" id="navGroupDesktop">
-      <!-- Dashboard link inserted by JS above Home -->
-      <a href="https://camerasdecoded.com" class="nav-item"><i class="fas fa-home"></i> Home</a>
-      <a href="https://camerasdecoded.com/operators.html" class="nav-item"><i class="fas fa-user-astronaut"></i> Operators</a>
-      <a href="https://camerasdecoded.com/community.html" class="nav-item"><i class="fas fa-users"></i> Community</a>
-      <a href="https://camerasdecoded.com/educators-pdf-viewer.html" class="nav-item"><i class="fas fa-chalkboard-teacher"></i> Instructors</a>
-      <a href="https://camerasdecoded.com/partners.html" class="nav-item"><i class="fas fa-handshake"></i> Partners</a>
-      <hr class="sidebar-divider">
-      <a href="https://camerasdecoded.com/products.html" class="nav-item"><i class="fas fa-box-open"></i> Products</a>
-      <a href="https://camerasdecoded.com/protocols.html" class="nav-item"><i class="fas fa-code-branch"></i> Protocols</a>
-      <a href="index.html" class="nav-item active"><i class="fas fa-id-card"></i> Snapshot Cards</a>
-      <a href="https://camerasdecoded.com/cynetis-7.html" class="nav-item"><i class="fas fa-robot"></i> Cynetis-7</a>
-      <hr class="sidebar-divider">
-      <a href="https://camerasdecoded.com/blog-updates.html" class="nav-item"><i class="fas fa-newspaper"></i> Blog/Updates</a>
-      <a href="https://camerasdecoded.com/podcast.html" class="nav-item"><i class="fas fa-podcast"></i> Podcast</a>
-      <a href="https://camerasdecoded.com/inner-signal.html" class="nav-item"><i class="fas fa-brain"></i> Inner Signal</a>
-      <a href="https://camerasdecoded.com/about.html" class="nav-item"><i class="fas fa-info-circle"></i> About</a>
-    </div>
-    <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">☰</button>
-  </aside>
+    <!-- ===== SIDEBAR BACKDROP ===== -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-  <!-- MOBILE OVERLAY -->
-  <div class="nav-group-overlay" id="navGroupOverlay">
-    <button class="close-btn" id="closeToggle">✕</button>
-    <a href="https://camerasdecoded.com" class="nav-item"><i class="fas fa-home"></i> Home</a>
-    <a href="https://camerasdecoded.com/operators.html" class="nav-item"><i class="fas fa-user-astronaut"></i> Operators</a>
-    <a href="https://camerasdecoded.com/community.html" class="nav-item"><i class="fas fa-users"></i> Community</a>
-    <a href="https://camerasdecoded.com/educators-pdf-viewer.html" class="nav-item"><i class="fas fa-chalkboard-teacher"></i> Instructors</a>
-    <a href="https://camerasdecoded.com/partners.html" class="nav-item"><i class="fas fa-handshake"></i> Partners</a>
-    <hr class="sidebar-divider">
-    <a href="https://camerasdecoded.com/products.html" class="nav-item"><i class="fas fa-box-open"></i> Products</a>
-    <a href="https://camerasdecoded.com/protocols.html" class="nav-item"><i class="fas fa-code-branch"></i> Protocols</a>
-    <a href="index.html" class="nav-item"><i class="fas fa-id-card"></i> Snapshot Cards</a>
-    <a href="https://camerasdecoded.com/cynetis-7.html" class="nav-item"><i class="fas fa-robot"></i> Cynetis-7</a>
-    <hr class="sidebar-divider">
-    <a href="https://camerasdecoded.com/blog-updates.html" class="nav-item"><i class="fas fa-newspaper"></i> Blog/Updates</a>
-    <a href="https://camerasdecoded.com/podcast.html" class="nav-item"><i class="fas fa-podcast"></i> Podcast</a>
-    <a href="https://camerasdecoded.com/inner-signal.html" class="nav-item"><i class="fas fa-brain"></i> Inner Signal</a>
-    <a href="https://camerasdecoded.com/about.html" class="nav-item"><i class="fas fa-info-circle"></i> About</a>
-    <div id="mobileDashboardContainer"></div>
-  </div>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+        <button class="sidebar-close" id="sidebarClose">✕</button>
+        <div class="logo">
+            <a href="https://camerasdecoded.com"><img src="https://camerasdecoded.com/cameras-decoded-logo.png" alt="Cameras Decoded" /></a>
+        </div>
 
-  <!-- FLOATING HEADER – Home -> main site, three nav links -->
-  <div class="floating-header" id="floatingHeader">
-    <a href="https://camerasdecoded.com" class="floating-home-icon" title="Home"><i class="fas fa-home"></i></a>
-    <div class="floating-nav-links">
-      <a href="https://camerasdecoded.com/operators.html">Operators</a>
-      <a href="https://camerasdecoded.com/partners.html">Partners</a>
-      <a href="https://camerasdecoded.com/educators-pdf-viewer.html">Instructors</a>
-    </div>
-    <a href="cart.html" class="cart-header-link chasing-border" id="cartHeaderLink">
-      <i class="fas fa-shopping-cart"></i> <span id="cartHeaderLabel">Cart</span>
-      <span class="cart-count-badge" id="cartHeaderCount" style="display:none;">0</span>
-    </a>
-    <button class="floating-toggle" id="floatingToggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
-  </div>
+        <div class="sidebar-profile" id="sidebarProfile">
+            <div class="profile-avatar" id="profileAvatar" style="background-image: url('https://camerasdecoded.com/cameras-decoded-logo.png');">
+                <input type="file" id="avatarUpload" accept="image/*" />
+                <label for="avatarUpload" class="upload-overlay" title="Upload Profile Photo"><i class="fas fa-camera"></i></label>
+            </div>
+            <div class="profile-name" id="sidebarUsername">Operator</div>
+            <div class="profile-email" id="sidebarEmail">operator@camerasdecoded.com</div>
+        </div>
 
-  <!-- MAIN CONTENT -->
-  <main class="main-content">
+        <nav class="sidebar-nav">
+            <div class="nav-group">
+                <a href="https://camerasdecoded.com/operator-dashboard.html" class="nav-item"><i class="fas fa-chart-simple"></i> Dashboard</a>
+                <a href="https://camerasdecoded.com" class="nav-item"><i class="fas fa-home"></i> Home</a>
+            </div>
+            <hr class="sidebar-divider">
+            <div class="nav-group">
+                <a href="https://camerasdecoded.com/operators.html" class="nav-item"><i class="fas fa-user-astronaut"></i> Operators</a>
+                <a href="https://camerasdecoded.com/community.html" class="nav-item"><i class="fas fa-users"></i> Community</a>
+                <a href="https://camerasdecoded.com/educators-pdf-viewer.html" class="nav-item"><i class="fas fa-chalkboard-teacher"></i> Instructors</a>
+                <a href="https://camerasdecoded.com/partners.html" class="nav-item"><i class="fas fa-handshake"></i> Partners</a>
+            </div>
+            <hr class="sidebar-divider">
+            <div class="nav-group">
+                <a href="https://camerasdecoded.com/journey.html" class="nav-item"><i class="fas fa-route"></i> Journey</a>
+                <a href="https://camerasdecoded.com/products.html" class="nav-item"><i class="fas fa-box-open"></i> Products</a>
+                <a href="https://camerasdecoded.com/protocols.html" class="nav-item"><i class="fas fa-code-branch"></i> Protocols</a>
+                <a href="index.html" class="nav-item active"><i class="fas fa-id-card"></i> Snapshot Cards</a>
+                <a href="https://camerasdecoded.com/cynetis-7.html" class="nav-item"><i class="fas fa-robot"></i> Cynetis-7</a>
+            </div>
+            <hr class="sidebar-divider">
+            <div class="nav-group">
+                <a href="https://camerasdecoded.com/blog-updates.html" class="nav-item"><i class="fas fa-newspaper"></i> Blog/Updates</a>
+                <a href="https://camerasdecoded.com/podcast.html" class="nav-item"><i class="fas fa-podcast"></i> Podcast</a>
+                <a href="https://camerasdecoded.com/inner-signal.html" class="nav-item"><i class="fas fa-brain"></i> Inner Signal</a>
+            </div>
+            <hr class="sidebar-divider">
+            <div class="nav-group">
+                <a href="#" class="nav-item"><i class="fas fa-id-card"></i> Profile / Account</a>
+                <a href="#" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+                <a href="#" class="nav-item"><i class="fas fa-credit-card"></i> Billing</a>
+            </div>
+        </nav>
+    </aside>
 
-    <div class="atlas-hero">
-      <h1>🔍 Decoder Atlas</h1>
-      <div class="subtitle">Free camera settings for mirrorless operators. Search by camera, scenario, or lighting condition.</div>
-    </div>
-
-    <!-- DAILY PROTOCOL CTA (from main site) – placed right below subtitle -->
-    <div class="scroll-cue reveal-on-scroll reveal-delay-1">
-      <span>See the signal in motion</span>
-      <i class="fas fa-chevron-down"></i>
-    </div>
-    <div class="onboarding-cta-wrapper reveal-on-scroll reveal-delay-1">
-      <a href="https://camerasdecoded.com/onboarding.html" class="btn-onboarding" target="_blank">
-        <span>Daily Protocol</span>
-        <i class="fas fa-arrow-right"></i>
-      </a>
-    </div>
-
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Search by camera (e.g., 'Sony A7IV')" onkeyup="filterArticles()">
-      <select id="scenarioFilter" onchange="filterArticles()">
-        <option value="">All Scenarios</option>
-        <option value="Portrait">Portrait</option>
-        <option value="Event">Event</option>
-        <option value="Sports">Sports</option>
-        <option value="Real Estate">Real Estate</option>
-        <option value="Street">Street</option>
-      </select>
-      <select id="lightingFilter" onchange="filterArticles()">
-        <option value="">All Lighting</option>
-        <option value="Low Light">Low Light</option>
-        <option value="Bright Natural">Bright Natural</option>
-        <option value="Golden Hour">Golden Hour</option>
-        <option value="Indoor Artificial">Indoor Artificial</option>
-        <option value="Overcast">Overcast</option>
-      </select>
-    </div>
-
-    <div class="article-grid" id="articleGrid"></div>
-
-    <footer class="footer">
-      <div>© 2026 Cameras Decoded. All rights reserved.</div>
-      <div class="socials">
-        <a href="https://www.youtube.com/@CamerasDecoded"><i class="fab fa-youtube"></i></a>
-        <a href="https://www.tiktok.com/@cameras.decoded"><i class="fab fa-tiktok"></i></a>
-        <a href="https://www.instagram.com/camerasdecoded/reels/"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.facebook.com/profile.php?id=61553594660326"><i class="fab fa-facebook-f"></i></a>
-        <a href="https://camerasdecoded.substack.com"><i class="fas fa-bookmark"></i></a>
-        <a href="https://podcasts.apple.com/us/podcast/cameras-decoded/idYOURID" target="_blank"><i class="fas fa-podcast"></i></a>
-      </div>
-      <div>© Cameras Decoded — The Entity transmits. The Signal Keeper builds. You decode.</div>
-      <div class="footer-links">
-        <a href="https://camerasdecoded.com/roadmap.html">Roadmap</a> · 
-        <a href="https://camerasdecoded.com/blog-updates.html">Blog/Updates</a> · 
-        <a href="https://camerasdecoded.com/faq.html">FAQ</a> · 
-        <a href="https://camerasdecoded.com/contact.html">Contact</a>
-        <a href="https://camerasdecoded.com/podcast.html">Podcast</a>
-      </div>
-      <div class="footer-links">
-        <a href="https://camerasdecoded.com/terms.html">Privacy/Terms</a>
-        <a href="mailto:signal@camerasdecoded.com">signal@camerasdecoded.com</a>
-      </div>
-    </footer>
-
-  </main>
-
-  <button id="scrollTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'});">↑</button>
-
-  <!-- FIREBASE & UTILITIES -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="firebase-init.js"></script>
-  <script src="cd-ui.js"></script>
-
-  <script>
-    // --- Binary Rain ---
-    (function() {
-      const canvas = document.getElementById('binary-rain');
-      const ctx = canvas.getContext('2d');
-      let width = window.innerWidth, height = window.innerHeight;
-      canvas.width = width; canvas.height = height;
-      const fontSize = 16, columns = Math.floor(width / fontSize);
-      const drops = Array(columns).fill(1), speed = 0.55;
-      function draw() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, width, height);
-        ctx.font = fontSize + 'px "Space Mono", monospace';
-        ctx.textAlign = 'center';
-        for (let i = 0; i < drops.length; i++) {
-          const char = Math.random() > 0.5 ? '1' : '0';
-          const x = i * fontSize + fontSize / 2, y = drops[i] * fontSize;
-          if (char === '1') { ctx.shadowColor = '#8deb00'; ctx.shadowBlur = 8; ctx.fillStyle = '#8deb00'; }
-          else { ctx.shadowColor = '#3a7a1a'; ctx.shadowBlur = 4; ctx.fillStyle = '#4caf50'; }
-          ctx.fillText(char, x, y);
-          if (char === '1' && Math.random() < 0.025) {
-            ctx.shadowBlur = 15; ctx.fillStyle = '#ffffff';
-            ctx.beginPath(); ctx.arc(x - 2, y - 8, 1.5, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
-          }
-          if (y > height && Math.random() > 0.97) drops[i] = 0;
-          drops[i] += speed;
-        }
-        requestAnimationFrame(draw);
-      }
-      draw();
-      window.addEventListener('resize', () => {
-        width = window.innerWidth; height = window.innerHeight;
-        canvas.width = width; canvas.height = height;
-        const newColumns = Math.floor(width / fontSize);
-        if (newColumns > drops.length) drops.push(...Array(newColumns - drops.length).fill(1));
-        else drops.length = newColumns;
-      });
-    })();
-
-    // --- Mobile Menu Toggle ---
-    document.addEventListener('DOMContentLoaded', function() {
-      const mobileToggle = document.getElementById('mobileToggle');
-      const floatingToggle = document.getElementById('floatingToggle');
-      const closeToggle = document.getElementById('closeToggle');
-      const overlay = document.getElementById('navGroupOverlay');
-
-      function openMenu() { overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
-      function closeMenu() { overlay.classList.remove('open'); document.body.style.overflow = ''; }
-
-      if (mobileToggle) mobileToggle.addEventListener('click', (e) => { e.stopPropagation(); openMenu(); });
-      if (floatingToggle) floatingToggle.addEventListener('click', (e) => { e.stopPropagation(); openMenu(); });
-      if (closeToggle) closeToggle.addEventListener('click', (e) => { e.stopPropagation(); closeMenu(); });
-      if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeMenu(); });
-    });
-
-    // --- Scroll to Top ---
-    window.onscroll = function() {
-      const btn = document.getElementById('scrollTopBtn');
-      if (!btn) return;
-      const show = document.body.scrollTop > 400 || document.documentElement.scrollTop > 400;
-      if (show) { btn.classList.add('show'); requestAnimationFrame(() => btn.classList.add('pulse')); }
-      else { btn.classList.remove('show', 'pulse'); }
-    };
-
-    // --- Cart Counter ---
-    function getCart() { return JSON.parse(localStorage.getItem('cameras_decoded_cart') || '[]'); }
-    function updateCartUI() {
-      const cart = getCart();
-      const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-      const countEl = document.getElementById('cartHeaderCount');
-      const labelEl = document.getElementById('cartHeaderLabel');
-      if (countEl) { countEl.textContent = totalItems; countEl.style.display = totalItems > 0 ? 'inline-block' : 'none'; }
-      if (labelEl) { labelEl.textContent = totalItems > 0 ? `Cart (${totalItems})` : 'Cart'; }
-    }
-    updateCartUI();
-
-    // --- Dashboard Link Insertion (using opToken or localStorage) ---
-    const homeNav = document.querySelector('.sidebar .nav-item[href="https://camerasdecoded.com"]');
-    const mobileContainer = document.getElementById('mobileDashboardContainer');
-
-    function removeDashboardLink() {
-      const existingDesktop = document.getElementById('dynamic-dashboard-node');
-      if (existingDesktop) existingDesktop.remove();
-      const existingMobile = document.getElementById('mobile-dashboard-node');
-      if (existingMobile) existingMobile.remove();
-    }
-
-    function insertDashboardLink(dashboardUrl) {
-      if (homeNav && homeNav.parentNode) {
-        const existing = document.getElementById('dynamic-dashboard-node');
-        if (existing) existing.remove();
-        const dashLink = document.createElement('a');
-        dashLink.id = 'dynamic-dashboard-node';
-        dashLink.className = 'nav-item';
-        dashLink.innerHTML = '<i class="fas fa-chart-simple"></i> Dashboard';
-        dashLink.href = dashboardUrl;
-        homeNav.parentNode.insertBefore(dashLink, homeNav);
-      }
-      if (mobileContainer) {
-        const existing = document.getElementById('mobile-dashboard-node');
-        if (existing) existing.remove();
-        const dashLink = document.createElement('a');
-        dashLink.id = 'mobile-dashboard-node';
-        dashLink.className = 'nav-item dashboard-link';
-        dashLink.innerHTML = '<i class="fas fa-chart-simple"></i> Dashboard';
-        dashLink.href = dashboardUrl;
-        mobileContainer.appendChild(dashLink);
-      }
-    }
-
-    function tryDashboardFromUid(uid) {
-      if (!db) { insertDashboardLink('https://camerasdecoded.com/operator-dashboard.html'); return; }
-      db.collection('users').doc(uid).get().then((doc) => {
-        if (doc.exists) {
-          const role = doc.data().role || 'Operator';
-          let url = 'https://camerasdecoded.com/operator-dashboard.html';
-          if (role === 'Instructor') url = 'https://camerasdecoded.com/instructor-dashboard.html';
-          else if (role === 'Partner') url = 'https://camerasdecoded.com/partner-dashboard.html';
-          insertDashboardLink(url);
-        } else {
-          insertDashboardLink('https://camerasdecoded.com/operator-dashboard.html');
-        }
-      }).catch(() => {
-        insertDashboardLink('https://camerasdecoded.com/operator-dashboard.html');
-      });
-    }
-
-    (function initDashboardLink() {
-      const params = new URLSearchParams(window.location.search);
-      const opToken = params.get('opToken');
-      if (opToken) {
-        localStorage.setItem('cameras_decoded_uid', opToken);
-        tryDashboardFromUid(opToken);
-      } else {
-        if (typeof auth !== 'undefined' && auth) {
-          auth.onAuthStateChanged((user) => {
-            if (user) {
-              localStorage.setItem('cameras_decoded_uid', user.uid);
-              tryDashboardFromUid(user.uid);
-            } else {
-              const storedUid = localStorage.getItem('cameras_decoded_uid');
-              if (storedUid) tryDashboardFromUid(storedUid);
-              else removeDashboardLink();
-            }
-          });
-        } else {
-          const storedUid = localStorage.getItem('cameras_decoded_uid');
-          if (storedUid) tryDashboardFromUid(storedUid);
-        }
-      }
-    })();
-
-    // --- Scroll Reveal Observer (for the daily protocol CTA) ---
-    document.addEventListener('DOMContentLoaded', function() {
-      const revealEls = document.querySelectorAll('.reveal-on-scroll');
-      const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
-          }
-        });
-      }, { threshold: 0.12, rootMargin: '0px 0px -20px 0px' });
-      revealEls.forEach(el => revealObserver.observe(el));
-    });
-
-    // --- Articles Data (slugs match your actual card page filenames) ---
-    const articles = [
-      // Sony A7IV
-      { camera: "Sony A7IV", scenario: "Portrait", lighting: "Low Light", slug: "sony-a7iv-portrait-low-light", difficulty: "Intermediate" },
-      { camera: "Sony A7IV", scenario: "Portrait", lighting: "Bright Natural", slug: "sony-a7iv-portrait-bright-natural", difficulty: "Beginner" },
-      { camera: "Sony A7IV", scenario: "Portrait", lighting: "Golden Hour", slug: "sony-a7iv-portrait-golden-hour", difficulty: "Beginner" },
-      { camera: "Sony A7IV", scenario: "Portrait", lighting: "Overcast", slug: "sony-a7iv-portrait-overcast", difficulty: "Beginner" },
-      { camera: "Sony A7IV", scenario: "Portrait", lighting: "Indoor Artificial", slug: "sony-a7iv-portrait-indoor-artificial", difficulty: "Beginner" },
-      { camera: "Sony A7IV", scenario: "Event", lighting: "Indoor Artificial", slug: "sony-a7iv-event-indoor-artificial", difficulty: "Intermediate" },
-      { camera: "Sony A7IV", scenario: "Event", lighting: "Low Light", slug: "sony-a7iv-event-low-light", difficulty: "Intermediate" },
-      { camera: "Sony A7IV", scenario: "Event", lighting: "Bright Natural", slug: "sony-a7iv-event-bright-natural", difficulty: "Beginner" },
-      { camera: "Sony A7IV", scenario: "Event", lighting: "Overcast", slug: "sony-a7iv-event-overcast", difficulty: "Beginner" },
-      { camera: "Sony A7IV", scenario: "Event", lighting: "Golden Hour", slug: "sony-a7iv-event-golden-hour", difficulty: "Beginner" },
-      { camera: "Sony A7IV", scenario: "Sports", lighting: "Low Light", slug: "sony-a7iv-sports-low-light", difficulty: "Advanced" },
-      { camera: "Sony A7IV", scenario: "Sports", lighting: "Bright Natural", slug: "sony-a7iv-sports-bright-natural", difficulty: "Intermediate" },
-      { camera: "Sony A7IV", scenario: "Sports", lighting: "Indoor Artificial", slug: "sony-a7iv-sports-indoor-artificial", difficulty: "Advanced" },
-      { camera: "Sony A7IV", scenario: "Sports", lighting: "Overcast", slug: "sony-a7iv-sports-overcast", difficulty: "Intermediate" },
-      { camera: "Sony A7IV", scenario: "Sports", lighting: "Golden Hour", slug: "sony-a7iv-sports-golden-hour", difficulty: "Intermediate" },
-      { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Bright Natural", slug: "sony-a7iv-real-estate-bright-natural", difficulty: "Beginner" },
-      { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Low Light", slug: "sony-a7iv-real-estate-low-light", difficulty: "Intermediate" },
-      { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Indoor Artificial", slug: "sony-a7iv-real-estate-indoor-artificial", difficulty: "Beginner" },
-      { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Overcast", slug: "sony-a7iv-real-estate-overcast", difficulty: "Beginner" },
-      { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Golden Hour", slug: "sony-a7iv-real-estate-golden-hour", difficulty: "Beginner" },
-      // Canon R6 Mark II
-      { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Golden Hour", slug: "canon-r6ii-portrait-golden-hour", difficulty: "Beginner" },
-      { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Low Light", slug: "canon-r6ii-portrait-low-light", difficulty: "Intermediate" },
-      { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Bright Natural", slug: "canon-r6ii-portrait-bright-natural", difficulty: "Beginner" },
-      { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Overcast", slug: "canon-r6ii-portrait-overcast", difficulty: "Beginner" },
-      { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Indoor Artificial", slug: "canon-r6ii-portrait-indoor-artificial", difficulty: "Beginner" },
-      { camera: "Canon R6 Mark II", scenario: "Event", lighting: "Indoor Artificial", slug: "canon-r6ii-event-indoor-artificial", difficulty: "Intermediate" },
-      { camera: "Canon R6 Mark II", scenario: "Event", lighting: "Low Light", slug: "canon-r6ii-event-low-light", difficulty: "Intermediate" },
-      { camera: "Canon R6 Mark II", scenario: "Event", lighting: "Bright Natural", slug: "canon-r6ii-event-bright-natural", difficulty: "Beginner" },
-      { camera: "Canon R6 Mark II", scenario: "Event", lighting: "Overcast", slug: "canon-r6ii-event-overcast", difficulty: "Beginner" },
-      { camera: "Canon R6 Mark II", scenario: "Event", lighting: "Golden Hour", slug: "canon-r6ii-event-golden-hour", difficulty: "Beginner" },
-      { camera: "Canon R6 Mark II", scenario: "Sports", lighting: "Bright Natural", slug: "canon-r6ii-sports-bright-natural", difficulty: "Intermediate" },
-      { camera: "Canon R6 Mark II", scenario: "Sports", lighting: "Low Light", slug: "canon-r6ii-sports-low-light", difficulty: "Advanced" },
-      { camera: "Canon R6 Mark II", scenario: "Sports", lighting: "Indoor Artificial", slug: "canon-r6ii-sports-indoor-artificial", difficulty: "Intermediate" },
-      { camera: "Canon R6 Mark II", scenario: "Sports", lighting: "Overcast", slug: "canon-r6ii-sports-overcast", difficulty: "Intermediate" },
-      { camera: "Canon R6 Mark II", scenario: "Sports", lighting: "Golden Hour", slug: "canon-r6ii-sports-golden-hour", difficulty: "Intermediate" },
-      { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Bright Natural", slug: "canon-r6ii-real-estate-bright-natural", difficulty: "Beginner" },
-      { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Low Light", slug: "canon-r6ii-real-estate-low-light", difficulty: "Intermediate" },
-      { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Indoor Artificial", slug: "canon-r6ii-real-estate-indoor-artificial", difficulty: "Beginner" },
-      { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Overcast", slug: "canon-r6ii-real-estate-overcast", difficulty: "Beginner" },
-      { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Golden Hour", slug: "canon-r6ii-real-estate-golden-hour", difficulty: "Beginner" },
-      // Fujifilm X-T5
-      { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Golden Hour", slug: "fujifilm-x-t5-portrait-golden-hour", difficulty: "Intermediate" },
-      { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Low Light", slug: "fujifilm-x-t5-portrait-low-light", difficulty: "Intermediate" },
-      { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Bright Natural", slug: "fujifilm-x-t5-portrait-bright-natural", difficulty: "Beginner" },
-      { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Overcast", slug: "fujifilm-x-t5-portrait-overcast", difficulty: "Beginner" },
-      { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Indoor Artificial", slug: "fujifilm-x-t5-portrait-indoor-artificial", difficulty: "Beginner" },
-      { camera: "Fujifilm X-T5", scenario: "Event", lighting: "Golden Hour", slug: "fujifilm-x-t5-event-golden-hour", difficulty: "Intermediate" },
-      { camera: "Fujifilm X-T5", scenario: "Event", lighting: "Indoor Artificial", slug: "fujifilm-x-t5-event-indoor-artificial", difficulty: "Intermediate" },
-      { camera: "Fujifilm X-T5", scenario: "Event", lighting: "Low Light", slug: "fujifilm-x-t5-event-low-light", difficulty: "Intermediate" },
-      { camera: "Fujifilm X-T5", scenario: "Event", lighting: "Bright Natural", slug: "fujifilm-x-t5-event-bright-natural", difficulty: "Beginner" },
-      { camera: "Fujifilm X-T5", scenario: "Event", lighting: "Overcast", slug: "fujifilm-x-t5-event-overcast", difficulty: "Beginner" },
-      { camera: "Fujifilm X-T5", scenario: "Street", lighting: "Bright Natural", slug: "fujifilm-x-t5-street-bright-natural", difficulty: "Beginner" },
-      { camera: "Fujifilm X-T5", scenario: "Sports", lighting: "Golden Hour", slug: "fujifilm-x-t5-sports-golden-hour", difficulty: "Intermediate" },
-      { camera: "Fujifilm X-T5", scenario: "Sports", lighting: "Bright Natural", slug: "fujifilm-x-t5-sports-bright-natural", difficulty: "Intermediate" },
-      { camera: "Fujifilm X-T5", scenario: "Sports", lighting: "Overcast", slug: "fujifilm-x-t5-sports-overcast", difficulty: "Intermediate" },
-      { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Bright Natural", slug: "fujifilm-x-t5-real-estate-bright-natural", difficulty: "Beginner" },
-      { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Golden Hour", slug: "fujifilm-x-t5-real-estate-golden-hour", difficulty: "Beginner" },
-      { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Indoor Artificial", slug: "fujifilm-x-t5-real-estate-indoor-artificial", difficulty: "Beginner" },
-      { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Low Light", slug: "fujifilm-x-t5-real-estate-low-light", difficulty: "Intermediate" },
-      { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Overcast", slug: "fujifilm-x-t5-real-estate-overcast", difficulty: "Beginner" },
-      // Nikon Z6 III
-      { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Golden Hour", slug: "nikon-z6-iii-portrait-golden-hour", difficulty: "Intermediate" },
-      { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Low Light", slug: "nikon-z6-iii-portrait-low-light", difficulty: "Intermediate" },
-      { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Bright Natural", slug: "nikon-z6-iii-portrait-bright-natural", difficulty: "Beginner" },
-      { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Overcast", slug: "nikon-z6-iii-portrait-overcast", difficulty: "Beginner" },
-      { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Indoor Artificial", slug: "nikon-z6-iii-portrait-indoor-artificial", difficulty: "Beginner" },
-      { camera: "Nikon Z6 III", scenario: "Event", lighting: "Golden Hour", slug: "nikon-z6-iii-event-golden-hour", difficulty: "Intermediate" },
-      { camera: "Nikon Z6 III", scenario: "Event", lighting: "Indoor Artificial", slug: "nikon-z6-iii-event-indoor-artificial", difficulty: "Intermediate" },
-      { camera: "Nikon Z6 III", scenario: "Event", lighting: "Low Light", slug: "nikon-z6-iii-event-low-light", difficulty: "Intermediate" },
-      { camera: "Nikon Z6 III", scenario: "Event", lighting: "Bright Natural", slug: "nikon-z6-iii-event-bright-natural", difficulty: "Beginner" },
-      { camera: "Nikon Z6 III", scenario: "Event", lighting: "Overcast", slug: "nikon-z6-iii-event-overcast", difficulty: "Beginner" },
-      { camera: "Nikon Z6 III", scenario: "Sports", lighting: "Bright Natural", slug: "nikon-z6-iii-sports-bright-natural", difficulty: "Intermediate" },
-      { camera: "Nikon Z6 III", scenario: "Sports", lighting: "Low Light", slug: "nikon-z6-iii-sports-low-light", difficulty: "Advanced" },
-      { camera: "Nikon Z6 III", scenario: "Sports", lighting: "Indoor Artificial", slug: "nikon-z6-iii-sports-indoor-artificial", difficulty: "Intermediate" },
-      { camera: "Nikon Z6 III", scenario: "Sports", lighting: "Overcast", slug: "nikon-z6-iii-sports-overcast", difficulty: "Intermediate" },
-      { camera: "Nikon Z6 III", scenario: "Sports", lighting: "Golden Hour", slug: "nikon-z6-iii-sports-golden-hour", difficulty: "Intermediate" },
-      { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Bright Natural", slug: "nikon-z6-iii-real-estate-bright-natural", difficulty: "Beginner" },
-      { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Low Light", slug: "nikon-z6-iii-real-estate-low-light", difficulty: "Intermediate" },
-      { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Indoor Artificial", slug: "nikon-z6-iii-real-estate-indoor-artificial", difficulty: "Beginner" },
-      { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Overcast", slug: "nikon-z6-iii-real-estate-overcast", difficulty: "Beginner" },
-      { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Golden Hour", slug: "nikon-z6-iii-real-estate-golden-hour", difficulty: "Beginner" },
-      // Sony A6700
-      { camera: "Sony A6700", scenario: "Portrait", lighting: "Bright Natural", slug: "sony-a6700-portrait-bright-natural", difficulty: "Beginner" },
-      { camera: "Sony A6700", scenario: "Portrait", lighting: "Golden Hour", slug: "sony-a6700-portrait-golden-hour", difficulty: "Beginner" },
-      { camera: "Sony A6700", scenario: "Portrait", lighting: "Low Light", slug: "sony-a6700-portrait-low-light", difficulty: "Intermediate" },
-      { camera: "Sony A6700", scenario: "Portrait", lighting: "Overcast", slug: "sony-a6700-portrait-overcast", difficulty: "Beginner" },
-      { camera: "Sony A6700", scenario: "Portrait", lighting: "Indoor Artificial", slug: "sony-a6700-portrait-indoor-artificial", difficulty: "Beginner" },
-      { camera: "Sony A6700", scenario: "Event", lighting: "Golden Hour", slug: "sony-a6700-event-golden-hour", difficulty: "Intermediate" },
-      { camera: "Sony A6700", scenario: "Event", lighting: "Indoor Artificial", slug: "sony-a6700-event-indoor-artificial", difficulty: "Intermediate" },
-      { camera: "Sony A6700", scenario: "Event", lighting: "Low Light", slug: "sony-a6700-event-low-light", difficulty: "Intermediate" },
-      { camera: "Sony A6700", scenario: "Event", lighting: "Bright Natural", slug: "sony-a6700-event-bright-natural", difficulty: "Beginner" },
-      { camera: "Sony A6700", scenario: "Event", lighting: "Overcast", slug: "sony-a6700-event-overcast", difficulty: "Beginner" },
-      { camera: "Sony A6700", scenario: "Sports", lighting: "Bright Natural", slug: "sony-a6700-sports-bright-natural", difficulty: "Intermediate" },
-      { camera: "Sony A6700", scenario: "Sports", lighting: "Golden Hour", slug: "sony-a6700-sports-golden-hour", difficulty: "Intermediate" },
-      { camera: "Sony A6700", scenario: "Sports", lighting: "Overcast", slug: "sony-a6700-sports-overcast", difficulty: "Intermediate" },
-      { camera: "Sony A6700", scenario: "Sports", lighting: "Low Light", slug: "sony-a6700-sports-low-light", difficulty: "Advanced" },
-      { camera: "Sony A6700", scenario: "Real Estate", lighting: "Bright Natural", slug: "sony-a6700-real-estate-bright-natural", difficulty: "Beginner" },
-      { camera: "Sony A6700", scenario: "Real Estate", lighting: "Golden Hour", slug: "sony-a6700-real-estate-golden-hour", difficulty: "Beginner" },
-      { camera: "Sony A6700", scenario: "Real Estate", lighting: "Indoor Artificial", slug: "sony-a6700-real-estate-indoor-artificial", difficulty: "Beginner" },
-      { camera: "Sony A6700", scenario: "Real Estate", lighting: "Low Light", slug: "sony-a6700-real-estate-low-light", difficulty: "Intermediate" },
-      { camera: "Sony A6700", scenario: "Real Estate", lighting: "Overcast", slug: "sony-a6700-real-estate-overcast", difficulty: "Beginner" }
-    ];
-
-    function getBrand(cameraName) { return cameraName.split(' ')[0]; }
-
-    function renderArticles(filtered) {
-      const grid = document.getElementById('articleGrid');
-      grid.innerHTML = '';
-      if (filtered.length === 0) {
-        grid.innerHTML = '<p style="color:#b4b4b4; grid-column: 1/-1; text-align:center; padding:40px 0;">No matching articles found.</p>';
-        return;
-      }
-
-      const groups = {};
-      filtered.forEach(article => {
-        const brand = getBrand(article.camera);
-        if (!groups[brand]) groups[brand] = [];
-        groups[brand].push(article);
-      });
-
-      Object.keys(groups).sort().forEach(brand => {
-        const items = groups[brand];
-        const divider = document.createElement('div');
-        divider.className = 'brand-divider';
-        divider.innerHTML = `
-          <div>
-            <span class="brand-name">${brand}</span><span class="brand-count">${items.length} setup${items.length === 1 ? '' : 's'}</span>
-          </div>
-        `;
-        grid.appendChild(divider);
-
-        items.forEach(article => {
-          const card = document.createElement('div');
-          card.className = 'article-card';
-          card.innerHTML = `
-            <a href="${article.slug}.html">
-              <div class="camera">${article.camera}</div>
-              <div class="title">${article.scenario} — ${article.lighting}</div>
-              <div class="meta">${article.difficulty} · Click to view settings</div>
+    <!-- ===== FLOATING HEADER ===== -->
+    <div class="floating-header" id="floatingHeader">
+        <div class="floating-left-group">
+            <a href="https://camerasdecoded.com" class="floating-home-icon" title="Home"><i class="fas fa-home"></i></a>
+            <span class="floating-toggle" id="floatingToggle"><i class="fas fa-bars"></i></span>
+        </div>
+        <div class="floating-center-group">
+            <span class="floating-title"><strong>Snapshot</strong> Library</span>
+        </div>
+        <div class="floating-right-group">
+            <a href="https://camerasdecoded.com/cart.html" class="cart-header-link chasing-border" id="cartHeaderLink">
+                <i class="fas fa-shopping-cart"></i> <span id="cartHeaderLabel">Cart</span>
+                <span class="cart-count-badge" id="cartHeaderCount" style="display:none;">0</span>
             </a>
-          `;
-          grid.appendChild(card);
+            <button class="logout-btn" id="floatingLogoutBtn" style="display:none;" onclick="handleLogout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- ===== ADD CARD MODAL ===== -->
+    <div class="add-card-modal" id="addCardModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">✕</button>
+            <h3><i class="fas fa-plus-circle"></i> Add Snapshot Card</h3>
+            <input type="text" id="modalCardName" placeholder="Card name (e.g., Sony A7IV Portrait)" />
+            <input type="text" id="modalCardImage" placeholder="Image URL (optional)" />
+            <button class="btn-submit" id="modalAddBtn"><i class="fas fa-save"></i> Save to Library</button>
+            <div id="modalStatus" class="status-msg"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MAIN WRAPPER
+         ============================================================ -->
+    <div class="main-wrapper">
+
+        <!-- ===== TWO-TIER LAYOUT ===== -->
+        <div class="tier-container">
+
+            <!-- ---- TIER 1: LIBRARY (browsable atlas) ---- -->
+            <div class="tier-library">
+                <div class="tier-header">
+                    <h2><i class="fas fa-compass" style="color:var(--green);"></i> Decoder Atlas</h2>
+                    <div class="search-box">
+                        <input type="text" id="atlasSearch" placeholder="Search..." oninput="filterAtlas()" />
+                        <select id="atlasScenario" onchange="filterAtlas()">
+                            <option value="">All Scenarios</option>
+                            <option value="Portrait">Portrait</option>
+                            <option value="Event">Event</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Real Estate">Real Estate</option>
+                            <option value="Street">Street</option>
+                        </select>
+                        <select id="atlasLighting" onchange="filterAtlas()">
+                            <option value="">All Lighting</option>
+                            <option value="Low Light">Low Light</option>
+                            <option value="Bright Natural">Bright Natural</option>
+                            <option value="Golden Hour">Golden Hour</option>
+                            <option value="Indoor Artificial">Indoor Artificial</option>
+                            <option value="Overcast">Overcast</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="library-scroll" id="libraryScroll">
+                    <div class="atlas-grid" id="atlasGrid"></div>
+                </div>
+            </div>
+
+            <!-- ---- TIER 2: SAVED CARDS CAROUSEL ---- -->
+            <div class="tier-saved">
+                <div class="tier-header">
+                    <div>
+                        <h2><i class="fas fa-id-card" style="color:var(--green);"></i> My Cards</h2>
+                        <span class="card-count" id="cardCount">0 saved</span>
+                    </div>
+                    <button class="add-card-btn" id="openAddCardBtn"><i class="fas fa-plus"></i> Add Card</button>
+                </div>
+
+                <div class="carousel-wrapper">
+                    <div class="carousel-track" id="carouselTrack">
+                        <!-- Cards rendered here -->
+                    </div>
+                </div>
+                <div class="carousel-nav">
+                    <button id="carouselLeft" title="Scroll left"><i class="fas fa-chevron-left"></i></button>
+                    <button id="carouselRight" title="Scroll right"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== BACK LINK ===== -->
+        <div class="back-link-wrap">
+            <a href="https://camerasdecoded.com/operator-dashboard.html">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+         SCRIPTS
+         ============================================================ -->
+    <script>
+        // ============================================================
+        // BINARY RAIN
+        // ============================================================
+        (function() {
+            const canvas = document.getElementById('binary-rain');
+            const ctx = canvas.getContext('2d');
+            let width = window.innerWidth,
+                height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            const fontSize = 16;
+            const columns = Math.floor(width / fontSize);
+            const drops = Array(columns).fill(1);
+            const speed = 0.55;
+
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, width, height);
+                ctx.font = fontSize + 'px "Space Mono", monospace';
+                ctx.textAlign = 'center';
+                for (let i = 0; i < drops.length; i++) {
+                    const char = Math.random() > 0.5 ? '1' : '0';
+                    const x = i * fontSize + fontSize / 2;
+                    const y = drops[i] * fontSize;
+                    if (char === '1') {
+                        ctx.shadowColor = '#8deb00';
+                        ctx.shadowBlur = 8;
+                        ctx.fillStyle = '#8deb00';
+                    } else {
+                        ctx.shadowColor = '#3a7a1a';
+                        ctx.shadowBlur = 4;
+                        ctx.fillStyle = '#4caf50';
+                    }
+                    ctx.fillText(char, x, y);
+                    if (char === '1' && Math.random() < 0.025) {
+                        ctx.shadowBlur = 15;
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(x - 2, y - 8, 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    }
+                    if (y > height && Math.random() > 0.97) {
+                        drops[i] = 0;
+                    }
+                    drops[i] += speed;
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+            window.addEventListener('resize', () => {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                const newColumns = Math.floor(width / fontSize);
+                if (newColumns > drops.length) drops.push(...Array(newColumns - drops.length).fill(1));
+                else drops.length = newColumns;
+            });
+        })();
+
+        // ============================================================
+        // FLOATING HEADER HAMBURGER (opens sidebar)
+        // ============================================================
+        const floatingToggle = document.getElementById('floatingToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarBackdrop.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarBackdrop.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        if (floatingToggle) floatingToggle.addEventListener('click', openSidebar);
+        if (sidebarClose) sidebarClose.addEventListener('click', closeSidebar);
+        if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
+
+        // ============================================================
+        // CART COUNTER
+        // ============================================================
+        function getCart() { return JSON.parse(localStorage.getItem('cameras_decoded_cart') || '[]'); }
+
+        function updateCartUI() {
+            const cart = getCart();
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            const countEl = document.getElementById('cartHeaderCount');
+            const labelEl = document.getElementById('cartHeaderLabel');
+            if (countEl) { countEl.textContent = totalItems;
+                countEl.style.display = totalItems > 0 ? 'inline-block' : 'none'; }
+            if (labelEl) { labelEl.textContent = totalItems > 0 ? `Cart (${totalItems})` : 'Cart'; }
+        }
+        updateCartUI();
+
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB95Vx0i8W6WNfUy1N4TNQyfN5xCxQYnz8",
+            authDomain: "cameras-decoded.firebaseapp.com",
+            projectId: "cameras-decoded",
+            storageBucket: "cameras-decoded.firebasestorage.app",
+            messagingSenderId: "1088920052790",
+            appId: "1:1088920052790:web:2177c1fb31109c1fa02497",
+            measurementId: "G-YN3M01WW0B"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ============================================================
+        // DOM REFS
+        // ============================================================
+        const floatingLogoutBtn = document.getElementById('floatingLogoutBtn');
+        const cardCount = document.getElementById('cardCount');
+        const carouselTrack = document.getElementById('carouselTrack');
+        const atlasGrid = document.getElementById('atlasGrid');
+        const atlasSearch = document.getElementById('atlasSearch');
+        const atlasScenario = document.getElementById('atlasScenario');
+        const atlasLighting = document.getElementById('atlasLighting');
+
+        const modal = document.getElementById('addCardModal');
+        const openAddBtn = document.getElementById('openAddCardBtn');
+        const closeModal = document.getElementById('closeModal');
+        const modalCardName = document.getElementById('modalCardName');
+        const modalCardImage = document.getElementById('modalCardImage');
+        const modalAddBtn = document.getElementById('modalAddBtn');
+        const modalStatus = document.getElementById('modalStatus');
+
+        const carouselLeft = document.getElementById('carouselLeft');
+        const carouselRight = document.getElementById('carouselRight');
+
+        // Sidebar profile elements
+        const profileAvatar = document.getElementById('profileAvatar');
+        const avatarUpload = document.getElementById('avatarUpload');
+        const sidebarUsername = document.getElementById('sidebarUsername');
+        const sidebarEmail = document.getElementById('sidebarEmail');
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let userDocRef = null;
+        let unsubscribe = null;
+        let savedCards = [];
+        let savedCardIds = [];
+
+        // ============================================================
+        // LOGOUT
+        // ============================================================
+        window.handleLogout = function() {
+            if (unsubscribe) { unsubscribe();
+                unsubscribe = null; }
+            auth.signOut().then(() => {
+                window.location.href = 'https://camerasdecoded.com/login.html';
+            }).catch(() => {
+                window.location.href = 'https://camerasdecoded.com/login.html';
+            });
+        };
+
+        // ============================================================
+        // PROFILE PHOTO UPLOAD
+        // ============================================================
+        if (avatarUpload && profileAvatar) {
+            const savedPhoto = localStorage.getItem('profilePhoto');
+            if (savedPhoto) {
+                profileAvatar.style.backgroundImage = `url(${savedPhoto})`;
+            }
+            avatarUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const imgData = event.target.result;
+                        profileAvatar.style.backgroundImage = `url(${imgData})`;
+                        localStorage.setItem('profilePhoto', imgData);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // ============================================================
+        // MODAL CONTROLS
+        // ============================================================
+        openAddBtn.addEventListener('click', () => {
+            modal.classList.add('open');
+            modalCardName.value = '';
+            modalCardImage.value = '';
+            modalStatus.textContent = '';
+            modalStatus.className = 'status-msg';
+            modalAddBtn.disabled = false;
+            modalAddBtn.innerHTML = '<i class="fas fa-save"></i> Save to Library';
+            setTimeout(() => modalCardName.focus(), 200);
         });
-      });
-    }
 
-    function filterArticles() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const scenario = document.getElementById('scenarioFilter').value;
-      const lighting = document.getElementById('lightingFilter').value;
+        closeModal.addEventListener('click', () => modal.classList.remove('open'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('open');
+        });
 
-      const filtered = articles.filter(article => {
-        const matchSearch = article.camera.toLowerCase().includes(search) ||
-                            article.scenario.toLowerCase().includes(search) ||
-                            article.lighting.toLowerCase().includes(search);
-        const matchScenario = scenario === '' || article.scenario === scenario;
-        const matchLighting = lighting === '' || article.lighting === lighting;
-        return matchSearch && matchScenario && matchLighting;
-      });
-      renderArticles(filtered);
-    }
+        // ============================================================
+        // ADD CARD (from modal)
+        // ============================================================
+        modalAddBtn.addEventListener('click', async () => {
+            if (!currentUser || !userDocRef) {
+                modalStatus.textContent = 'Please log in first.';
+                modalStatus.className = 'status-msg error';
+                return;
+            }
 
-    renderArticles(articles);
-  </script>
+            const name = modalCardName.value.trim();
+            if (!name) {
+                modalStatus.textContent = 'Please enter a card name.';
+                modalStatus.className = 'status-msg error';
+                return;
+            }
+
+            const imageUrl = modalCardImage.value.trim() ||
+                'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';
+            const id = 'card_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+
+            const newCard = {
+                id: id,
+                name: name,
+                imageUrl: imageUrl,
+                savedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            modalAddBtn.disabled = true;
+            modalAddBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                await userDocRef.update({
+                    savedCards: firebase.firestore.FieldValue.arrayUnion(newCard)
+                });
+                modalStatus.textContent = '✅ Card saved successfully!';
+                modalStatus.className = 'status-msg success';
+                modalCardName.value = '';
+                modalCardImage.value = '';
+                setTimeout(() => modal.classList.remove('open'), 1200);
+            } catch (err) {
+                console.error('Add card error:', err);
+                modalStatus.textContent = '❌ Error: ' + err.message;
+                modalStatus.className = 'status-msg error';
+            } finally {
+                modalAddBtn.disabled = false;
+                modalAddBtn.innerHTML = '<i class="fas fa-save"></i> Save to Library';
+            }
+        });
+
+        modalCardName.addEventListener('keydown', (e) => { if (e.key === 'Enter') modalAddBtn.click(); });
+        modalCardImage.addEventListener('keydown', (e) => { if (e.key === 'Enter') modalAddBtn.click(); });
+
+        // ============================================================
+        // REMOVE CARD
+        // ============================================================
+        function removeCard(cardId) {
+            if (!currentUser || !userDocRef) return;
+            if (!confirm('Remove this card from your library?')) return;
+
+            userDocRef.get().then(doc => {
+                if (!doc.exists) return;
+                const cards = doc.data().savedCards || [];
+                const cardToRemove = cards.find(c => c.id === cardId);
+                if (!cardToRemove) return;
+                return userDocRef.update({
+                    savedCards: firebase.firestore.FieldValue.arrayRemove(cardToRemove)
+                });
+            }).catch(err => {
+                console.error('Remove error:', err);
+            });
+        }
+
+        // ============================================================
+        // CAROUSEL SCROLL
+        // ============================================================
+        carouselLeft.addEventListener('click', () => {
+            carouselTrack.scrollBy({ left: -200, behavior: 'smooth' });
+        });
+        carouselRight.addEventListener('click', () => {
+            carouselTrack.scrollBy({ left: 200, behavior: 'smooth' });
+        });
+
+        // ============================================================
+        // RENDER SAVED CARDS (carousel)
+        // ============================================================
+        function renderSavedCards(cards) {
+            savedCards = cards || [];
+            savedCardIds = savedCards.map(c => c.id || c);
+
+            if (!savedCards || savedCards.length === 0) {
+                carouselTrack.innerHTML = `
+                    <div class="carousel-card" style="flex:0 0 100%; min-height:120px; justify-content:center;">
+                        <div class="empty-placeholder">
+                            <i class="fas fa-id-card" style="font-size:32px; color:var(--green-dim); display:block; margin-bottom:8px;"></i>
+                            No cards saved yet.<br>Browse the Atlas above to add some!
+                        </div>
+                    </div>
+                `;
+                cardCount.textContent = '0 saved';
+                return;
+            }
+
+            cardCount.textContent = `${savedCards.length} saved`;
+
+            carouselTrack.innerHTML = savedCards.map(card => {
+                const id = card.id || 'card_' + Math.random();
+                const name = card.name || 'Untitled Card';
+                const imageUrl = card.imageUrl ||
+                    'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';
+
+                return `
+                    <div class="carousel-card">
+                        <a href="${id}.html" class="card-link">
+                            <img src="${imageUrl}" alt="${name}" onerror="this.src='https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card'" />
+                            <div class="card-name">${name}</div>
+                            <div class="card-id">${id}</div>
+                        </a>
+                        <button class="remove-btn" onclick="event.stopPropagation(); removeCard('${id}');" title="Remove card"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================================
+        // ATLAS ARTICLES (FULL LIST)
+        // ============================================================
+        const articles = [
+            // Sony A7IV
+            { camera: "Sony A7IV", scenario: "Portrait", lighting: "Low Light", slug: "sony-a7iv-portrait-low-light",
+                difficulty: "Intermediate" },
+            { camera: "Sony A7IV", scenario: "Portrait", lighting: "Bright Natural",
+                slug: "sony-a7iv-portrait-bright-natural", difficulty: "Beginner" },
+            { camera: "Sony A7IV", scenario: "Portrait", lighting: "Golden Hour",
+                slug: "sony-a7iv-portrait-golden-hour", difficulty: "Beginner" },
+            { camera: "Sony A7IV", scenario: "Portrait", lighting: "Overcast", slug: "sony-a7iv-portrait-overcast",
+                difficulty: "Beginner" },
+            { camera: "Sony A7IV", scenario: "Portrait", lighting: "Indoor Artificial",
+                slug: "sony-a7iv-portrait-indoor-artificial", difficulty: "Beginner" },
+            { camera: "Sony A7IV", scenario: "Event", lighting: "Indoor Artificial",
+                slug: "sony-a7iv-event-indoor-artificial", difficulty: "Intermediate" },
+            { camera: "Sony A7IV", scenario: "Event", lighting: "Low Light", slug: "sony-a7iv-event-low-light",
+                difficulty: "Intermediate" },
+            { camera: "Sony A7IV", scenario: "Event", lighting: "Bright Natural", slug: "sony-a7iv-event-bright-natural",
+                difficulty: "Beginner" },
+            { camera: "Sony A7IV", scenario: "Event", lighting: "Overcast", slug: "sony-a7iv-event-overcast",
+                difficulty: "Beginner" },
+            { camera: "Sony A7IV", scenario: "Event", lighting: "Golden Hour", slug: "sony-a7iv-event-golden-hour",
+                difficulty: "Beginner" },
+            { camera: "Sony A7IV", scenario: "Sports", lighting: "Low Light", slug: "sony-a7iv-sports-low-light",
+                difficulty: "Advanced" },
+            { camera: "Sony A7IV", scenario: "Sports", lighting: "Bright Natural", slug: "sony-a7iv-sports-bright-natural",
+                difficulty: "Intermediate" },
+            { camera: "Sony A7IV", scenario: "Sports", lighting: "Indoor Artificial",
+                slug: "sony-a7iv-sports-indoor-artificial", difficulty: "Advanced" },
+            { camera: "Sony A7IV", scenario: "Sports", lighting: "Overcast", slug: "sony-a7iv-sports-overcast",
+                difficulty: "Intermediate" },
+            { camera: "Sony A7IV", scenario: "Sports", lighting: "Golden Hour", slug: "sony-a7iv-sports-golden-hour",
+                difficulty: "Intermediate" },
+            { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Bright Natural",
+                slug: "sony-a7iv-real-estate-bright-natural", difficulty: "Beginner" },
+            { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Low Light", slug: "sony-a7iv-real-estate-low-light",
+                difficulty: "Intermediate" },
+            { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Indoor Artificial",
+                slug: "sony-a7iv-real-estate-indoor-artificial", difficulty: "Beginner" },
+            { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Overcast", slug: "sony-a7iv-real-estate-overcast",
+                difficulty: "Beginner" },
+            { camera: "Sony A7IV", scenario: "Real Estate", lighting: "Golden Hour",
+                slug: "sony-a7iv-real-estate-golden-hour", difficulty: "Beginner" },
+            // Canon R6 Mark II
+            { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Golden Hour",
+                slug: "canon-r6ii-portrait-golden-hour", difficulty: "Beginner" },
+            { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Low Light", slug: "canon-r6ii-portrait-low-light",
+                difficulty: "Intermediate" },
+            { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Bright Natural",
+                slug: "canon-r6ii-portrait-bright-natural", difficulty: "Beginner" },
+            { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Overcast", slug: "canon-r6ii-portrait-overcast",
+                difficulty: "Beginner" },
+            { camera: "Canon R6 Mark II", scenario: "Portrait", lighting: "Indoor Artificial",
+                slug: "canon-r6ii-portrait-indoor-artificial", difficulty: "Beginner" },
+            { camera: "Canon R6 Mark II", scenario: "Event", lighting: "Indoor Artificial",
+                slug: "canon-r6ii-event-indoor-artificial", difficulty: "Intermediate" },
+            { camera: "Canon R6 Mark II", scenario: "Event", lighting: "Low Light", slug: "canon-r6ii-event-low-light",
+                difficulty: "Intermediate" },
+            { camera: "Canon R6 Mark II", scenario: "Event", lighting: "Bright Natural",
+                slug: "canon-r6ii-event-bright-natural", difficulty: "Beginner" },
+            { camera: "Canon R6 Mark II", scenario: "Event", lighting: "Overcast", slug: "canon-r6ii-event-overcast",
+                difficulty: "Beginner" },
+            { camera: "Canon R6 Mark II", scenario: "Event", lighting: "Golden Hour", slug: "canon-r6ii-event-golden-hour",
+                difficulty: "Beginner" },
+            { camera: "Canon R6 Mark II", scenario: "Sports", lighting: "Bright Natural",
+                slug: "canon-r6ii-sports-bright-natural", difficulty: "Intermediate" },
+            { camera: "Canon R6 Mark II", scenario: "Sports", lighting: "Low Light", slug: "canon-r6ii-sports-low-light",
+                difficulty: "Advanced" },
+            { camera: "Canon R6 Mark II", scenario: "Sports", lighting: "Indoor Artificial",
+                slug: "canon-r6ii-sports-indoor-artificial", difficulty: "Intermediate" },
+            { camera: "Canon R6 Mark II", scenario: "Sports", lighting: "Overcast", slug: "canon-r6ii-sports-overcast",
+                difficulty: "Intermediate" },
+            { camera: "Canon R6 Mark II", scenario: "Sports", lighting: "Golden Hour",
+                slug: "canon-r6ii-sports-golden-hour", difficulty: "Intermediate" },
+            { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Bright Natural",
+                slug: "canon-r6ii-real-estate-bright-natural", difficulty: "Beginner" },
+            { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Low Light",
+                slug: "canon-r6ii-real-estate-low-light", difficulty: "Intermediate" },
+            { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Indoor Artificial",
+                slug: "canon-r6ii-real-estate-indoor-artificial", difficulty: "Beginner" },
+            { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Overcast",
+                slug: "canon-r6ii-real-estate-overcast", difficulty: "Beginner" },
+            { camera: "Canon R6 Mark II", scenario: "Real Estate", lighting: "Golden Hour",
+                slug: "canon-r6ii-real-estate-golden-hour", difficulty: "Beginner" },
+            // Fujifilm X-T5
+            { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Golden Hour",
+                slug: "fujifilm-x-t5-portrait-golden-hour", difficulty: "Intermediate" },
+            { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Low Light", slug: "fujifilm-x-t5-portrait-low-light",
+                difficulty: "Intermediate" },
+            { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Bright Natural",
+                slug: "fujifilm-x-t5-portrait-bright-natural", difficulty: "Beginner" },
+            { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Overcast", slug: "fujifilm-x-t5-portrait-overcast",
+                difficulty: "Beginner" },
+            { camera: "Fujifilm X-T5", scenario: "Portrait", lighting: "Indoor Artificial",
+                slug: "fujifilm-x-t5-portrait-indoor-artificial", difficulty: "Beginner" },
+            { camera: "Fujifilm X-T5", scenario: "Event", lighting: "Golden Hour", slug: "fujifilm-x-t5-event-golden-hour",
+                difficulty: "Intermediate" },
+            { camera: "Fujifilm X-T5", scenario: "Event", lighting: "Indoor Artificial",
+                slug: "fujifilm-x-t5-event-indoor-artificial", difficulty: "Intermediate" },
+            { camera: "Fujifilm X-T5", scenario: "Event", lighting: "Low Light", slug: "fujifilm-x-t5-event-low-light",
+                difficulty: "Intermediate" },
+            { camera: "Fujifilm X-T5", scenario: "Event", lighting: "Bright Natural",
+                slug: "fujifilm-x-t5-event-bright-natural", difficulty: "Beginner" },
+            { camera: "Fujifilm X-T5", scenario: "Event", lighting: "Overcast", slug: "fujifilm-x-t5-event-overcast",
+                difficulty: "Beginner" },
+            { camera: "Fujifilm X-T5", scenario: "Street", lighting: "Bright Natural",
+                slug: "fujifilm-x-t5-street-bright-natural", difficulty: "Beginner" },
+            { camera: "Fujifilm X-T5", scenario: "Sports", lighting: "Golden Hour", slug: "fujifilm-x-t5-sports-golden-hour",
+                difficulty: "Intermediate" },
+            { camera: "Fujifilm X-T5", scenario: "Sports", lighting: "Bright Natural",
+                slug: "fujifilm-x-t5-sports-bright-natural", difficulty: "Intermediate" },
+            { camera: "Fujifilm X-T5", scenario: "Sports", lighting: "Overcast", slug: "fujifilm-x-t5-sports-overcast",
+                difficulty: "Intermediate" },
+            { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Bright Natural",
+                slug: "fujifilm-x-t5-real-estate-bright-natural", difficulty: "Beginner" },
+            { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Golden Hour",
+                slug: "fujifilm-x-t5-real-estate-golden-hour", difficulty: "Beginner" },
+            { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Indoor Artificial",
+                slug: "fujifilm-x-t5-real-estate-indoor-artificial", difficulty: "Beginner" },
+            { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Low Light",
+                slug: "fujifilm-x-t5-real-estate-low-light", difficulty: "Intermediate" },
+            { camera: "Fujifilm X-T5", scenario: "Real Estate", lighting: "Overcast",
+                slug: "fujifilm-x-t5-real-estate-overcast", difficulty: "Beginner" },
+            // Nikon Z6 III
+            { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Golden Hour",
+                slug: "nikon-z6-iii-portrait-golden-hour", difficulty: "Intermediate" },
+            { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Low Light", slug: "nikon-z6-iii-portrait-low-light",
+                difficulty: "Intermediate" },
+            { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Bright Natural",
+                slug: "nikon-z6-iii-portrait-bright-natural", difficulty: "Beginner" },
+            { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Overcast", slug: "nikon-z6-iii-portrait-overcast",
+                difficulty: "Beginner" },
+            { camera: "Nikon Z6 III", scenario: "Portrait", lighting: "Indoor Artificial",
+                slug: "nikon-z6-iii-portrait-indoor-artificial", difficulty: "Beginner" },
+            { camera: "Nikon Z6 III", scenario: "Event", lighting: "Golden Hour", slug: "nikon-z6-iii-event-golden-hour",
+                difficulty: "Intermediate" },
+            { camera: "Nikon Z6 III", scenario: "Event", lighting: "Indoor Artificial",
+                slug: "nikon-z6-iii-event-indoor-artificial", difficulty: "Intermediate" },
+            { camera: "Nikon Z6 III", scenario: "Event", lighting: "Low Light", slug: "nikon-z6-iii-event-low-light",
+                difficulty: "Intermediate" },
+            { camera: "Nikon Z6 III", scenario: "Event", lighting: "Bright Natural",
+                slug: "nikon-z6-iii-event-bright-natural", difficulty: "Beginner" },
+            { camera: "Nikon Z6 III", scenario: "Event", lighting: "Overcast", slug: "nikon-z6-iii-event-overcast",
+                difficulty: "Beginner" },
+            { camera: "Nikon Z6 III", scenario: "Sports", lighting: "Bright Natural",
+                slug: "nikon-z6-iii-sports-bright-natural", difficulty: "Intermediate" },
+            { camera: "Nikon Z6 III", scenario: "Sports", lighting: "Low Light", slug: "nikon-z6-iii-sports-low-light",
+                difficulty: "Advanced" },
+            { camera: "Nikon Z6 III", scenario: "Sports", lighting: "Indoor Artificial",
+                slug: "nikon-z6-iii-sports-indoor-artificial", difficulty: "Intermediate" },
+            { camera: "Nikon Z6 III", scenario: "Sports", lighting: "Overcast", slug: "nikon-z6-iii-sports-overcast",
+                difficulty: "Intermediate" },
+            { camera: "Nikon Z6 III", scenario: "Sports", lighting: "Golden Hour", slug: "nikon-z6-iii-sports-golden-hour",
+                difficulty: "Intermediate" },
+            { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Bright Natural",
+                slug: "nikon-z6-iii-real-estate-bright-natural", difficulty: "Beginner" },
+            { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Low Light",
+                slug: "nikon-z6-iii-real-estate-low-light", difficulty: "Intermediate" },
+            { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Indoor Artificial",
+                slug: "nikon-z6-iii-real-estate-indoor-artificial", difficulty: "Beginner" },
+            { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Overcast",
+                slug: "nikon-z6-iii-real-estate-overcast", difficulty: "Beginner" },
+            { camera: "Nikon Z6 III", scenario: "Real Estate", lighting: "Golden Hour",
+                slug: "nikon-z6-iii-real-estate-golden-hour", difficulty: "Beginner" },
+            // Sony A6700
+            { camera: "Sony A6700", scenario: "Portrait", lighting: "Bright Natural",
+                slug: "sony-a6700-portrait-bright-natural", difficulty: "Beginner" },
+            { camera: "Sony A6700", scenario: "Portrait", lighting: "Golden Hour", slug: "sony-a6700-portrait-golden-hour",
+                difficulty: "Beginner" },
+            { camera: "Sony A6700", scenario: "Portrait", lighting: "Low Light", slug: "sony-a6700-portrait-low-light",
+                difficulty: "Intermediate" },
+            { camera: "Sony A6700", scenario: "Portrait", lighting: "Overcast", slug: "sony-a6700-portrait-overcast",
+                difficulty: "Beginner" },
+            { camera: "Sony A6700", scenario: "Portrait", lighting: "Indoor Artificial",
+                slug: "sony-a6700-portrait-indoor-artificial", difficulty: "Beginner" },
+            { camera: "Sony A6700", scenario: "Event", lighting: "Golden Hour", slug: "sony-a6700-event-golden-hour",
+                difficulty: "Intermediate" },
+            { camera: "Sony A6700", scenario: "Event", lighting: "Indoor Artificial",
+                slug: "sony-a6700-event-indoor-artificial", difficulty: "Intermediate" },
+            { camera: "Sony A6700", scenario: "Event", lighting: "Low Light", slug: "sony-a6700-event-low-light",
+                difficulty: "Intermediate" },
+            { camera: "Sony A6700", scenario: "Event", lighting: "Bright Natural", slug: "sony-a6700-event-bright-natural",
+                difficulty: "Beginner" },
+            { camera: "Sony A6700", scenario: "Event", lighting: "Overcast", slug: "sony-a6700-event-overcast",
+                difficulty: "Beginner" },
+            { camera: "Sony A6700", scenario: "Sports", lighting: "Bright Natural", slug: "sony-a6700-sports-bright-natural",
+                difficulty: "Intermediate" },
+            { camera: "Sony A6700", scenario: "Sports", lighting: "Golden Hour", slug: "sony-a6700-sports-golden-hour",
+                difficulty: "Intermediate" },
+            { camera: "Sony A6700", scenario: "Sports", lighting: "Overcast", slug: "sony-a6700-sports-overcast",
+                difficulty: "Intermediate" },
+            { camera: "Sony A6700", scenario: "Sports", lighting: "Low Light", slug: "sony-a6700-sports-low-light",
+                difficulty: "Advanced" },
+            { camera: "Sony A6700", scenario: "Real Estate", lighting: "Bright Natural",
+                slug: "sony-a6700-real-estate-bright-natural", difficulty: "Beginner" },
+            { camera: "Sony A6700", scenario: "Real Estate", lighting: "Golden Hour",
+                slug: "sony-a6700-real-estate-golden-hour", difficulty: "Beginner" },
+            { camera: "Sony A6700", scenario: "Real Estate", lighting: "Indoor Artificial",
+                slug: "sony-a6700-real-estate-indoor-artificial", difficulty: "Beginner" },
+            { camera: "Sony A6700", scenario: "Real Estate", lighting: "Low Light",
+                slug: "sony-a6700-real-estate-low-light", difficulty: "Intermediate" },
+            { camera: "Sony A6700", scenario: "Real Estate", lighting: "Overcast",
+                slug: "sony-a6700-real-estate-overcast", difficulty: "Beginner" }
+        ];
+
+        // ============================================================
+        // ATLAS RENDER & FILTER
+        // ============================================================
+        function getBrand(cameraName) { return cameraName.split(' ')[0]; }
+
+        function renderAtlas(filtered) {
+            if (!filtered) filtered = articles;
+            atlasGrid.innerHTML = '';
+
+            if (filtered.length === 0) {
+                atlasGrid.innerHTML =
+                    '<div style="grid-column:1/-1; text-align:center; padding:30px 0; color:var(--text-muted);">No matching articles found.</div>';
+                return;
+            }
+
+            const groups = {};
+            filtered.forEach(article => {
+                const brand = getBrand(article.camera);
+                if (!groups[brand]) groups[brand] = [];
+                groups[brand].push(article);
+            });
+
+            Object.keys(groups).sort().forEach(brand => {
+                const items = groups[brand];
+                const label = document.createElement('div');
+                label.className = 'brand-label';
+                label.textContent = `${brand}  (${items.length})`;
+                atlasGrid.appendChild(label);
+
+                items.forEach(article => {
+                    const isSaved = savedCardIds.includes(article.slug);
+                    const div = document.createElement('div');
+                    div.className = 'atlas-item';
+                    div.innerHTML = `
+                        <div class="camera">${article.camera}</div>
+                        <div class="title">${article.scenario} — ${article.lighting}</div>
+                        <div class="meta">${article.difficulty}</div>
+                        <button class="save-btn ${isSaved ? 'saved' : ''}" onclick="saveAtlasCard('${article.slug}', '${article.camera} — ${article.scenario}')" ${isSaved ? 'disabled' : ''}>
+                            ${isSaved ? '<i class="fas fa-check"></i> Saved' : '<i class="fas fa-plus"></i> Save'}
+                        </button>
+                    `;
+                    atlasGrid.appendChild(div);
+                });
+            });
+        }
+
+        function filterAtlas() {
+            const search = atlasSearch.value.toLowerCase();
+            const scenario = atlasScenario.value;
+            const lighting = atlasLighting.value;
+
+            const filtered = articles.filter(article => {
+                const matchSearch = article.camera.toLowerCase().includes(search) ||
+                    article.scenario.toLowerCase().includes(search) ||
+                    article.lighting.toLowerCase().includes(search);
+                const matchScenario = scenario === '' || article.scenario === scenario;
+                const matchLighting = lighting === '' || article.lighting === lighting;
+                return matchSearch && matchScenario && matchLighting;
+            });
+            renderAtlas(filtered);
+        }
+
+        // ============================================================
+        // SAVE FROM ATLAS
+        // ============================================================
+        window.saveAtlasCard = function(slug, name) {
+            if (!currentUser || !userDocRef) {
+                alert('Please log in first.');
+                return;
+            }
+            if (savedCardIds.includes(slug)) {
+                alert('Already saved.');
+                return;
+            }
+
+            const newCard = {
+                id: slug,
+                name: name,
+                imageUrl: 'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card',
+                savedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            userDocRef.update({
+                savedCards: firebase.firestore.FieldValue.arrayUnion(newCard)
+            }).then(() => {
+                // Update button states
+                document.querySelectorAll('.atlas-item .save-btn').forEach(btn => {
+                    const onclick = btn.getAttribute('onclick') || '';
+                    if (onclick.includes(slug)) {
+                        btn.innerHTML = '<i class="fas fa-check"></i> Saved';
+                        btn.classList.add('saved');
+                        btn.disabled = true;
+                    }
+                });
+            }).catch(err => {
+                console.error('Save error:', err);
+                alert('Error saving: ' + err.message);
+            });
+        };
+
+        // ============================================================
+        // FIREBASE AUTH
+        // ============================================================
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                userDocRef = db.collection('users').doc(user.uid);
+
+                if (floatingLogoutBtn) floatingLogoutBtn.style.display = 'inline-block';
+                sidebarUsername.textContent = user.displayName || user.email || 'Operator';
+                sidebarEmail.textContent = user.email || '';
+
+                if (unsubscribe) unsubscribe();
+                unsubscribe = userDocRef.onSnapshot(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        const cards = data.savedCards || [];
+                        renderSavedCards(cards);
+                        renderAtlas(filterAtlas());
+                    } else {
+                        userDocRef.set({
+                            savedCards: [],
+                            savedProtocols: [],
+                            savedBlogs: [],
+                            savedPodcasts: [],
+                            savedCommunityPosts: [],
+                            role: 'Operator',
+                            subscription: { tier: 'monthly', status: 'active' },
+                            name: user.displayName || '',
+                            username: user.email?.split('@')[0] || '',
+                            email: user.email || '',
+                            tier: 'free',
+                            billingInterval: 'monthly',
+                            preferences: { brands: [], lenses: [], interests: [] },
+                            confidence: 0,
+                            referralCode: '',
+                            totalReferrals: 0,
+                            totalCommissionEarned: 0,
+                            ambassadorTier: 'signal',
+                            tourCompleted: false,
+                            streakDays: 0,
+                            lastActiveDate: null,
+                            totalBonusPoints: 0
+                        }).then(() => {
+                            renderSavedCards([]);
+                            renderAtlas(filterAtlas());
+                        }).catch(console.error);
+                    }
+                }, error => {
+                    console.error('Snapshot error:', error);
+                });
+            } else {
+                currentUser = null;
+                if (unsubscribe) { unsubscribe();
+                    unsubscribe = null; }
+                if (floatingLogoutBtn) floatingLogoutBtn.style.display = 'none';
+                sidebarUsername.textContent = 'Guest';
+                sidebarEmail.textContent = '';
+                renderSavedCards([]);
+                renderAtlas(filterAtlas());
+
+                if (!document.getElementById('loginPrompt')) {
+                    const prompt = document.createElement('div');
+                    prompt.id = 'loginPrompt';
+                    prompt.style.cssText =
+                        'text-align:center; padding:40px 20px; color:var(--text-muted); border:1px solid var(--border-dim); border-radius:12px; margin:20px 0;';
+                    prompt.innerHTML = `
+                        <i class="fas fa-lock" style="font-size:32px; color:var(--green-dim); display:block; margin-bottom:12px;"></i>
+                        <p>Please <a href="https://camerasdecoded.com/login.html" style="color:var(--green);">log in</a> to save cards and manage your library.</p>
+                    `;
+                    document.querySelector('.tier-container').prepend(prompt);
+                }
+            }
+        });
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        renderAtlas(articles);
+        console.log('📦 Snapshot Library ready. All articles loaded.');
+    </script>
 </body>
 </html>
