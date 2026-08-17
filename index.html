@@ -15,7 +15,7 @@
 
   <style>
     /* ============================================================
-       COMPLETE STYLES (matches your brand)
+       COMPLETE STYLES
        ============================================================ */
     :root {
       --green: #8deb00;
@@ -53,9 +53,7 @@
       font-family: 'Space Mono', monospace;
     }
 
-    /* ============================================================
-       FLOATING HEADER
-       ============================================================ */
+    /* ===== FLOATING HEADER ===== */
     .floating-header {
       position: sticky;
       top: 12px;
@@ -151,9 +149,7 @@
       line-height: 16px;
     }
 
-    /* ============================================================
-       LOGIN PROMPT
-       ============================================================ */
+    /* ===== LOGIN PROMPT ===== */
     .login-prompt {
       text-align: center;
       padding: 14px 20px;
@@ -180,9 +176,7 @@
       color: #a0f520;
     }
 
-    /* ============================================================
-       TWO-TIER LAYOUT
-       ============================================================ */
+    /* ===== TWO-TIER LAYOUT ===== */
     .tier-container {
       display: flex;
       flex-direction: column;
@@ -515,9 +509,7 @@
       color: var(--green);
     }
 
-    /* ============================================================
-       ADD CARD MODAL
-       ============================================================ */
+    /* ===== ADD CARD MODAL ===== */
     .add-card-modal {
       display: none;
       position: fixed;
@@ -609,9 +601,7 @@
       color: #ff4a4a;
     }
 
-    /* ============================================================
-       FOOTER
-       ============================================================ */
+    /* ===== FOOTER ===== */
     .footer {
       border-top: 1px solid var(--border-dim);
       padding-top: 24px;
@@ -985,12 +975,20 @@
           id = card;
           const article = articles.find(a => a.slug === id);
           name = article ? `${article.camera} — ${article.scenario}` : id;
-          imageUrl = 'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';
+          // ★ Use actual card image from /cards/ folder
+          imageUrl = `cards/${id}-card.png`;
         } else {
           // Object card (from Atlas or modal)
           id = card.id || 'card_' + Math.random();
           name = card.name || 'Untitled Card';
-          imageUrl = card.imageUrl || 'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';
+          // ★ Try to use card image, fallback to placeholder
+          if (card.imageUrl && card.imageUrl !== 'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card') {
+            imageUrl = card.imageUrl;
+          } else if (id) {
+            imageUrl = `cards/${id}-card.png`;
+          } else {
+            imageUrl = 'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';
+          }
         }
 
         return `
@@ -1393,14 +1391,15 @@
       const article = articles.find(a => a.slug === slug);
       if (!article) return;
 
-      // Create an object card (to match the modal format)
+      // Create an object card with proper image path
       const newCard = {
         id: slug,
         name: `${article.camera} — ${article.scenario}`,
         camera: article.camera,
         scenario: article.scenario,
         lighting: article.lighting,
-        imageUrl: 'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card',
+        // ★ Use actual card image from /cards/ folder
+        imageUrl: `cards/${slug}-card.png`,
         savedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
 
