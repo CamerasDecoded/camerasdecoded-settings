@@ -1161,7 +1161,7 @@
     <canvas id="binary-rain"></canvas>
     <div id="rain-fade"></div>
 
-    <!-- ===== SIDEBAR BACKDROP (mobile) ===== -->
+    <!-- ===== SIDEBAR BACKDROP ===== -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <!-- ===== SIDEBAR ===== -->
@@ -1257,7 +1257,7 @@
         <!-- ===== TWO-TIER LAYOUT ===== -->
         <div class="tier-container">
 
-            <!-- ---- TIER 1: LIBRARY ---- -->
+            <!-- ---- TIER 1: DECODER ATLAS ---- -->
             <div class="tier-library" id="tierLibrary" style="background-image: url('https://via.placeholder.com/1200x600/0A0A0A/8deb00?text=Decoder+Atlas+BG');">
                 <div class="tier-header">
                     <h2><i class="fas fa-compass" style="color:var(--green);"></i> Decoder Atlas</h2>
@@ -1463,20 +1463,23 @@
         const db = firebase.firestore();
 
         // ============================================================
-        // TOKEN HANDLER
+        // TOKEN HANDLER – THE SOURCE OF TRUTH
         // ============================================================
         const UID_KEY = 'cameras_decoded_uid';
 
         function getCurrentUid() {
+            // 1. Check URL param first (opToken from handshake)
             const params = new URLSearchParams(window.location.search);
             const token = params.get('opToken');
             if (token) {
                 localStorage.setItem(UID_KEY, token);
+                // Clean the URL
                 params.delete('opToken');
                 const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
                 window.history.replaceState({}, '', cleanUrl);
                 return token;
             }
+            // 2. Fallback to localStorage
             return localStorage.getItem(UID_KEY);
         }
 
@@ -1831,38 +1834,6 @@
         }
 
         // ============================================================
-        // TOAST
-        // ============================================================
-        function cdToast(message, type) {
-            const container = document.getElementById('cd-toast-container');
-            if (!container) {
-                alert(message);
-                return;
-            }
-            const toast = document.createElement('div');
-            toast.className = 'cd-toast' + (type === 'error' ? ' error' : '');
-            toast.textContent = message;
-            container.appendChild(toast);
-            requestAnimationFrame(() => { toast.classList.add('show'); });
-            setTimeout(() => { toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300); }, 4000);
-        }
-
-        // ============================================================
-        // LOGOUT
-        // ============================================================
-        window.handleLogout = function() {
-            if (unsubscribe) { unsubscribe();
-                unsubscribe = null; }
-            localStorage.removeItem(UID_KEY);
-            auth.signOut().then(() => {
-                window.location.href = 'https://camerasdecoded.com/login.html';
-            }).catch(() => {
-                window.location.href = 'https://camerasdecoded.com/login.html';
-            });
-        };
-
-        // ============================================================
         // SAVE ATLAS CARD
         // ============================================================
         window.saveAtlasCard = function(slug, name) {
@@ -1885,7 +1856,7 @@
             db.collection('users').doc(currentUid).update({
                 savedCards: firebase.firestore.FieldValue.arrayUnion(newCard)
             }).then(() => {
-                // The snapshot will update the UI
+                // Snapshot will update UI
             }).catch(err => {
                 console.error('Save error:', err);
                 alert('Error saving: ' + err.message);
@@ -1910,6 +1881,24 @@
             }).catch(err => {
                 console.error('Remove error:', err);
             });
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function cdToast(message, type) {
+            const container = document.getElementById('cd-toast-container');
+            if (!container) {
+                alert(message);
+                return;
+            }
+            const toast = document.createElement('div');
+            toast.className = 'cd-toast' + (type === 'error' ? ' error' : '');
+            toast.textContent = message;
+            container.appendChild(toast);
+            requestAnimationFrame(() => { toast.classList.add('show'); });
+            setTimeout(() => { toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300); }, 4000);
         }
 
         // ============================================================
@@ -2017,32 +2006,64 @@
         }
 
         // ============================================================
-        // LOAD USER DATA (using token, not auth)
+        // LOGOUT
         // ============================================================
-        function loadUserData(uid) {
+        window.handleLogout = function() {
             if (unsubscribe) {
                 unsubscribe();
                 unsubscribe = null;
+            }
+            localStorage.removeItem(UID_KEY);
+            auth.signOut().then(() => {
+                window.location.href = 'https://camerasdecoded.com/login.html';
+            }).catch(() => {
+                window.location.href = 'https://camerasdecoded.com/login.html';
+            });
+        };
+
+        // ============================================================
+        // LOAD USER DATA – TOKEN-BASED, AUTH-INDEPENDENT
+        // ============================================================
+        function loadUserData(uid) {
+            if (!uid) {
+                // No token – show login prompt
+                loginPrompt.classList.add('show');
+                floatingLogoutBtn.style.display = 'none';
+                userBadge.style.display = 'none';
+                sidebarUsername.textContent = 'Guest';
+                sidebarEmail.textContent = '';
+                renderSavedCards([]);
+                renderAtlas(filterAtlas());
+                return;
             }
 
             currentUid = uid;
             userDocRef = db.collection('users').doc(uid);
 
-            // Show UI elements
+            // Show logged-in UI
+            loginPrompt.classList.remove('show');
             floatingLogoutBtn.style.display = 'inline-block';
             userBadge.style.display = 'inline-block';
-            loginPrompt.classList.remove('show');
 
-            // Set sidebar profile from Firestore
-            userDocRef.get().then(doc => {
+            // Unsubscribe old listener
+            if (unsubscribe) {
+                unsubscribe();
+                unsubscribe = null;
+            }
+
+            // Attach real-time listener
+            unsubscribe = userDocRef.onSnapshot(doc => {
                 if (doc.exists) {
                     const data = doc.data();
-                    sidebarUsername.textContent = data.username || data.name || 'Operator';
-                    sidebarEmail.textContent = data.email || '';
+                    const cards = data.savedCards || [];
+                    renderSavedCards(cards);
+                    renderAtlas(filterAtlas());
                     const tier = data.tier || 'free';
                     userBadge.textContent = tier === 'pro' ? 'Pro' : 'Free';
+                    if (data.username) sidebarUsername.textContent = data.username;
+                    if (data.email) sidebarEmail.textContent = data.email;
                 } else {
-                    // Create doc if it doesn't exist
+                    // Document doesn't exist – create it
                     userDocRef.set({
                         savedCards: [],
                         savedProtocols: [],
@@ -2066,57 +2087,39 @@
                         streakDays: 0,
                         lastActiveDate: null,
                         totalBonusPoints: 0
+                    }).then(() => {
+                        renderSavedCards([]);
+                        renderAtlas(filterAtlas());
                     }).catch(console.error);
                 }
-            }).catch(console.error);
+            }, error => {
+                console.error('Firestore listener error:', error);
+            });
 
-            // Attach real-time listener
-            unsubscribe = userDocRef.onSnapshot(doc => {
+            // Also fetch profile info for sidebar
+            userDocRef.get().then(doc => {
                 if (doc.exists) {
                     const data = doc.data();
-                    const cards = data.savedCards || [];
-                    renderSavedCards(cards);
-                    renderAtlas(filterAtlas());
-                    const tier = data.tier || 'free';
-                    userBadge.textContent = tier === 'pro' ? 'Pro' : 'Free';
                     if (data.username) sidebarUsername.textContent = data.username;
                     if (data.email) sidebarEmail.textContent = data.email;
-                } else {
-                    renderSavedCards([]);
-                    renderAtlas(filterAtlas());
                 }
-            }, error => {
-                console.error('Snapshot error:', error);
-            });
+            }).catch(console.error);
         }
 
         // ============================================================
-        // INIT
+        // INIT – RUN IMMEDIATELY ON PAGE LOAD
         // ============================================================
         const uid = getCurrentUid();
-        if (uid) {
-            loadUserData(uid);
-        } else {
-            // No token – show login prompt
-            loginPrompt.classList.add('show');
-            floatingLogoutBtn.style.display = 'none';
-            userBadge.style.display = 'none';
-            sidebarUsername.textContent = 'Guest';
-            sidebarEmail.textContent = '';
-            renderSavedCards([]);
-            renderAtlas(filterAtlas());
-        }
+        loadUserData(uid);
 
-        // Also listen for Firebase Auth state (for logout button UI)
-        // but do NOT reload the Firestore listener – we already have one.
+        // Also listen for Firebase Auth state changes (for logout button display)
+        // but DO NOT reload the Firestore listener – we already have one.
         auth.onAuthStateChanged(user => {
-            if (user) {
-                // If auth user exists, update the UI but keep the existing listener.
-                // Optionally, switch to the auth uid if it differs from currentUid.
-                if (user.uid !== currentUid) {
-                    localStorage.setItem(UID_KEY, user.uid);
-                    loadUserData(user.uid);
-                }
+            // Only update UI elements, don't reattach the listener
+            if (user && user.uid !== currentUid) {
+                // If the auth user differs from our token, optionally switch
+                localStorage.setItem(UID_KEY, user.uid);
+                loadUserData(user.uid);
             }
             // If user logs out, we handle it via handleLogout() which redirects.
         });
