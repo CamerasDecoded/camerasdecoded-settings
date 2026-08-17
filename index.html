@@ -955,7 +955,12 @@
 
     function renderCarousel(cards) {
       savedCards = cards || [];
-      savedCardIds = savedCards.map(c => c.id || c);
+
+      // Build savedCardIds from both string and object cards
+      savedCardIds = savedCards.map(c => {
+        if (typeof c === 'string') return c;
+        return c.id || null;
+      }).filter(id => id !== null);
 
       if (!savedCards || savedCards.length === 0) {
         carouselTrack.innerHTML = `
@@ -973,10 +978,20 @@
       cardCountEl.textContent = `${savedCards.length} saved`;
 
       carouselTrack.innerHTML = savedCards.map(card => {
-        const id = card.id || 'card_' + Math.random();
-        const name = card.name || 'Untitled Card';
-        const imageUrl = card.imageUrl ||
-          'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';
+        let id, name, imageUrl;
+
+        // Handle string ID (from detail page saves)
+        if (typeof card === 'string') {
+          id = card;
+          const article = articles.find(a => a.slug === id);
+          name = article ? `${article.camera} — ${article.scenario}` : id;
+          imageUrl = 'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';
+        } else {
+          // Object card (from Atlas or modal)
+          id = card.id || 'card_' + Math.random();
+          name = card.name || 'Untitled Card';
+          imageUrl = card.imageUrl || 'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';
+        }
 
         return `
           <div class="carousel-card">
@@ -1033,7 +1048,6 @@
             tier: 'free',
             username: '',
             email: '',
-            // other fields as needed
           }, { merge: true }).catch(console.warn);
         }
       }).catch(console.warn);
@@ -1066,8 +1080,12 @@
       docRef.get().then(doc => {
         if (!doc.exists) return;
         const cards = doc.data().savedCards || [];
-        const target = cards.find(c => c.id === cardId);
-        if (target) {
+        // Find target – could be a string or an object
+        const target = cards.find(c => {
+          if (typeof c === 'string') return c === cardId;
+          return c.id === cardId;
+        });
+        if (target !== undefined) {
           return docRef.update({
             savedCards: firebase.firestore.FieldValue.arrayRemove(target)
           });
@@ -1087,7 +1105,7 @@
     };
 
     // ============================================================
-    // 9. ATLAS ARTICLES (FULL LIST – ALL 100+)
+    // 9. ATLAS ARTICLES (FULL LIST)
     // ============================================================
     const articles = [
       // Sony A7IV
@@ -1375,6 +1393,7 @@
       const article = articles.find(a => a.slug === slug);
       if (!article) return;
 
+      // Create an object card (to match the modal format)
       const newCard = {
         id: slug,
         name: `${article.camera} — ${article.scenario}`,
@@ -1386,7 +1405,7 @@
       };
 
       saveCard(newCard).then(() => {
-        // Button state updated by Firestore listener
+        // The snapshot will update the UI
       }).catch(err => {
         console.error('Save error:', err);
         alert('Error saving: ' + err.message);
@@ -1501,25 +1520,9 @@
     // 16. BOOTSTRAP
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
-      // Resolve token and start sync
       const uid = resolveUserToken();
       initRealtimeSync(uid);
-
-      // Initial Atlas render
       renderAtlas(articles);
-
-      // Listen for storage changes (in case token changes in another tab)
-      window.addEventListener('storage', function(e) {
-        if (e.key === UID_KEY) {
-          const newUid = e.newValue;
-          if (newUid && newUid !== currentUid) {
-            initRealtimeSync(newUid);
-          }
-          if (!newUid) {
-            showLoginPrompt(true);
-          }
-        }
-      });
     });
 
     // ============================================================
