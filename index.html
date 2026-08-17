@@ -1457,9 +1457,7 @@
         let savedCardIds = [];
 
         // ============================================================
-        // ATLAS ARTICLES — includes image filename for reference
-        // Naming convention: {slug}-card.png (or .pdf)
-        // Example: sony-a7iv-portrait-overcast-card.png
+        // ATLAS ARTICLES — image filename convention: {slug}-card.png
         // ============================================================
         const articles = [
             // Sony A7IV
@@ -1665,8 +1663,7 @@
                 slug: "sony-a6700-real-estate-overcast", difficulty: "Beginner" }
         ];
 
-        // Add image filename to each article (convention: slug + "-card.png")
-        // Example: sony-a7iv-portrait-overcast-card.png
+        // Build image filename: {slug}-card.png
         articles.forEach(a => a.image = `${a.slug}-card.png`);
 
         // ============================================================
@@ -1696,33 +1693,49 @@
             cardCountEl.textContent = `${savedCards.length} saved`;
 
             carouselTrack.innerHTML = savedCards.map(card => {
-                let id, name, imageUrl;
+                let id, name, imageUrl, baseSlug;
 
                 if (typeof card === 'string') {
                     id = card;
                     const article = articles.find(a => a.slug === id);
                     name = article ? `${article.camera} — ${article.scenario}` : id;
-                    // Use article.image if available, otherwise construct
-                    imageUrl = article ? `cards/${article.image}` : `cards/${id}-card.png`;
+                    // Primary: use article.image (which has -card.png)
+                    // Fallback: use slug.png (without -card)
+                    if (article) {
+                        baseSlug = article.slug;
+                        imageUrl = `cards/${article.image}`;
+                    } else {
+                        baseSlug = id;
+                        imageUrl = `cards/${id}-card.png`;
+                    }
                 } else {
                     id = card.id || 'card_' + Math.random();
                     name = card.name || 'Untitled Card';
                     if (card.imageUrl && card.imageUrl !==
                         'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card') {
                         imageUrl = card.imageUrl;
-                    } else if (id) {
+                    } else {
                         // Try to find matching article for consistent naming
                         const article = articles.find(a => a.slug === id);
-                        imageUrl = article ? `cards/${article.image}` : `cards/${id}-card.png`;
-                    } else {
-                        imageUrl = 'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';
+                        if (article) {
+                            baseSlug = article.slug;
+                            imageUrl = `cards/${article.image}`;
+                        } else {
+                            baseSlug = id;
+                            imageUrl = `cards/${id}-card.png`;
+                        }
                     }
                 }
+
+                // Build the image tag with onerror fallback to the non-"-card" version
+                const fallbackUrl = baseSlug ? `cards/${baseSlug}.png` : '';
+                const imgHtml = `<img src="${imageUrl}" alt="${name}" 
+                                  onerror="this.onerror=null; this.src='${fallbackUrl}'; this.onerror=function(){this.src='https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';}" />`;
 
                 return `
               <div class="carousel-card">
                 <a href="${id}.html" class="card-link">
-                  <img src="${imageUrl}" alt="${name}" onerror="this.src='https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card'" />
+                  ${imgHtml}
                   <div class="card-name">${name}</div>
                   <div class="card-id">${id}</div>
                 </a>
