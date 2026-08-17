@@ -254,7 +254,6 @@
             color: #a0f520;
         }
 
-        /* User badge in header */
         .user-badge {
             font-family: 'Space Mono', monospace;
             font-size: 9px;
@@ -267,7 +266,7 @@
         }
 
         /* ============================================================
-           SIDEBAR (visible on desktop, slide-in on mobile)
+           SIDEBAR
            ============================================================ */
         .sidebar {
             position: fixed;
@@ -378,7 +377,6 @@
             margin: 8px 0;
         }
 
-        /* Mobile slide-in */
         .sidebar-backdrop {
             position: fixed;
             inset: 0;
@@ -414,7 +412,6 @@
             margin-top: 8px;
         }
 
-        /* ---- TIER 1: LIBRARY (browsable atlas) ---- */
         .tier-library {
             border-radius: 12px;
             padding: 20px 20px 16px;
@@ -428,7 +425,6 @@
             display: flex;
             flex-direction: column;
         }
-        /* Overlay at 80% dark = 20% background visibility */
         .tier-library::before {
             content: '';
             position: absolute;
@@ -506,7 +502,6 @@
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 12px;
         }
-        /* Individual atlas cards are solid black */
         .atlas-item {
             background: #0A0A0A;
             border: 1px solid var(--border-dim);
@@ -576,7 +571,6 @@
             margin-bottom: 4px;
         }
 
-        /* ---- TIER 2: SAVED CARDS CAROUSEL ---- */
         .tier-saved {
             border-radius: 12px;
             padding: 20px 20px 16px;
@@ -661,7 +655,6 @@
             border-radius: 4px;
         }
 
-        /* Individual carousel cards are solid black */
         .carousel-card {
             flex: 0 0 160px;
             background: #0A0A0A;
@@ -861,7 +854,7 @@
         }
 
         /* ============================================================
-           LOGIN PROMPT (compact)
+           LOGIN PROMPT
            ============================================================ */
         .login-prompt {
             text-align: center;
@@ -933,9 +926,6 @@
             color: #a0f520;
         }
 
-        /* ============================================================
-           BACK LINK
-           ============================================================ */
         .back-link-wrap {
             margin-top: 24px;
             text-align: center;
@@ -1126,19 +1116,6 @@
             }
         }
 
-        /* ============================================================
-           UTILITY
-           ============================================================ */
-        .hidden {
-            display: none !important;
-        }
-        .text-muted {
-            color: var(--text-muted);
-        }
-        .text-green {
-            color: var(--green);
-        }
-
         /* ===== TOAST ===== */
         #cd-toast-container {
             position: fixed;
@@ -1187,7 +1164,7 @@
     <!-- ===== SIDEBAR BACKDROP (mobile) ===== -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-    <!-- ===== SIDEBAR (visible on desktop) ===== -->
+    <!-- ===== SIDEBAR ===== -->
     <aside class="sidebar" id="sidebar">
         <div class="logo">
             <a href="https://camerasdecoded.com"><img src="https://camerasdecoded.com/cameras-decoded-logo.png" alt="Cameras Decoded" /></a>
@@ -1268,12 +1245,10 @@
         </div>
     </div>
 
-    <!-- ============================================================
-         MAIN WRAPPER
-         ============================================================ -->
+    <!-- ===== MAIN WRAPPER ===== -->
     <div class="main-wrapper">
 
-        <!-- ===== COMPACT LOGIN PROMPT ===== -->
+        <!-- ===== LOGIN PROMPT ===== -->
         <div class="login-prompt" id="loginPrompt">
             <i class="fas fa-lock"></i>
             <span>Please <a href="https://camerasdecoded.com/login.html">log in</a> to save cards and manage your library.</span>
@@ -1282,7 +1257,7 @@
         <!-- ===== TWO-TIER LAYOUT ===== -->
         <div class="tier-container">
 
-            <!-- ---- TIER 1: LIBRARY (browsable atlas) ---- -->
+            <!-- ---- TIER 1: LIBRARY ---- -->
             <div class="tier-library" id="tierLibrary" style="background-image: url('https://via.placeholder.com/1200x600/0A0A0A/8deb00?text=Decoder+Atlas+BG');">
                 <div class="tier-header">
                     <h2><i class="fas fa-compass" style="color:var(--green);"></i> Decoder Atlas</h2>
@@ -1311,7 +1286,7 @@
                 </div>
             </div>
 
-            <!-- ---- TIER 2: SAVED CARDS CAROUSEL ---- -->
+            <!-- ---- TIER 2: SAVED CARDS ---- -->
             <div class="tier-saved" id="tierSaved" style="background-image: url('https://via.placeholder.com/1200x600/0A0A0A/8deb00?text=My+Cards+BG');">
                 <div class="tier-header">
                     <div>
@@ -1434,7 +1409,7 @@
         })();
 
         // ============================================================
-        // SIDEBAR TOGGLE (mobile)
+        // SIDEBAR TOGGLE
         // ============================================================
         const floatingToggle = document.getElementById('floatingToggle');
         const sidebar = document.getElementById('sidebar');
@@ -1472,7 +1447,7 @@
         updateCartUI();
 
         // ============================================================
-        // FIREBASE CONFIG
+        // FIREBASE
         // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyB95Vx0i8W6WNfUy1N4TNQyfN5xCxQYnz8",
@@ -1486,6 +1461,24 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+
+        // ============================================================
+        // TOKEN HANDLER
+        // ============================================================
+        const UID_KEY = 'cameras_decoded_uid';
+
+        function getCurrentUid() {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('opToken');
+            if (token) {
+                localStorage.setItem(UID_KEY, token);
+                params.delete('opToken');
+                const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                window.history.replaceState({}, '', cleanUrl);
+                return token;
+            }
+            return localStorage.getItem(UID_KEY);
+        }
 
         // ============================================================
         // DOM REFS
@@ -1519,148 +1512,11 @@
         // ============================================================
         // STATE
         // ============================================================
-        let currentUser = null;
+        let currentUid = null;
         let userDocRef = null;
         let unsubscribe = null;
         let savedCards = [];
         let savedCardIds = [];
-
-        // ============================================================
-        // LOGOUT
-        // ============================================================
-        window.handleLogout = function() {
-            if (unsubscribe) { unsubscribe();
-                unsubscribe = null; }
-            auth.signOut().then(() => {
-                window.location.href = 'https://camerasdecoded.com/login.html';
-            }).catch(() => {
-                window.location.href = 'https://camerasdecoded.com/login.html';
-            });
-        };
-
-        // ============================================================
-        // PROFILE PHOTO UPLOAD
-        // ============================================================
-        if (avatarUpload && profileAvatar) {
-            const savedPhoto = localStorage.getItem('profilePhoto');
-            if (savedPhoto) {
-                profileAvatar.style.backgroundImage = `url(${savedPhoto})`;
-            }
-            avatarUpload.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const imgData = event.target.result;
-                        profileAvatar.style.backgroundImage = `url(${imgData})`;
-                        localStorage.setItem('profilePhoto', imgData);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        // ============================================================
-        // MODAL CONTROLS
-        // ============================================================
-        openAddBtn.addEventListener('click', () => {
-            modal.classList.add('open');
-            modalCardName.value = '';
-            modalCardImage.value = '';
-            modalStatus.textContent = '';
-            modalStatus.className = 'status-msg';
-            modalAddBtn.disabled = false;
-            modalAddBtn.innerHTML = '<i class="fas fa-save"></i> Save to Library';
-            setTimeout(() => modalCardName.focus(), 200);
-        });
-
-        closeModal.addEventListener('click', () => modal.classList.remove('open'));
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.classList.remove('open');
-        });
-
-        // ============================================================
-        // ADD CARD (from modal)
-        // ============================================================
-        modalAddBtn.addEventListener('click', async () => {
-            if (!currentUser || !userDocRef) {
-                modalStatus.textContent = 'Please log in first.';
-                modalStatus.className = 'status-msg error';
-                return;
-            }
-
-            const name = modalCardName.value.trim();
-            if (!name) {
-                modalStatus.textContent = 'Please enter a card name.';
-                modalStatus.className = 'status-msg error';
-                return;
-            }
-
-            const imageUrl = modalCardImage.value.trim() ||
-                'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';
-            const id = 'card_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-
-            const newCard = {
-                id: id,
-                name: name,
-                imageUrl: imageUrl,
-                savedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            modalAddBtn.disabled = true;
-            modalAddBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-
-            try {
-                await userDocRef.update({
-                    savedCards: firebase.firestore.FieldValue.arrayUnion(newCard)
-                });
-                modalStatus.textContent = '✅ Card saved successfully!';
-                modalStatus.className = 'status-msg success';
-                modalCardName.value = '';
-                modalCardImage.value = '';
-                setTimeout(() => modal.classList.remove('open'), 1200);
-            } catch (err) {
-                console.error('Add card error:', err);
-                modalStatus.textContent = '❌ Error: ' + err.message;
-                modalStatus.className = 'status-msg error';
-            } finally {
-                modalAddBtn.disabled = false;
-                modalAddBtn.innerHTML = '<i class="fas fa-save"></i> Save to Library';
-            }
-        });
-
-        modalCardName.addEventListener('keydown', (e) => { if (e.key === 'Enter') modalAddBtn.click(); });
-        modalCardImage.addEventListener('keydown', (e) => { if (e.key === 'Enter') modalAddBtn.click(); });
-
-        // ============================================================
-        // REMOVE CARD
-        // ============================================================
-        function removeCard(cardId) {
-            if (!currentUser || !userDocRef) return;
-            if (!confirm('Remove this card from your library?')) return;
-
-            userDocRef.get().then(doc => {
-                if (!doc.exists) return;
-                const cards = doc.data().savedCards || [];
-                const cardToRemove = cards.find(c => c.id === cardId);
-                if (!cardToRemove) return;
-                return userDocRef.update({
-                    savedCards: firebase.firestore.FieldValue.arrayRemove(cardToRemove)
-                });
-            }).catch(err => {
-                console.error('Remove error:', err);
-            });
-        }
-
-        // ============================================================
-        // CAROUSEL SCROLL
-        // ============================================================
-        carouselLeft.addEventListener('click', () => {
-            carouselTrack.scrollBy({ left: -200, behavior: 'smooth' });
-        });
-        carouselRight.addEventListener('click', () => {
-            carouselTrack.scrollBy({ left: 200, behavior: 'smooth' });
-        });
 
         // ============================================================
         // RENDER SAVED CARDS (carousel)
@@ -1975,44 +1831,6 @@
         }
 
         // ============================================================
-        // SAVE FROM ATLAS
-        // ============================================================
-        window.saveAtlasCard = function(slug, name) {
-            if (!currentUser || !userDocRef) {
-                alert('Please log in first.');
-                return;
-            }
-            if (savedCardIds.includes(slug)) {
-                alert('Already saved.');
-                return;
-            }
-
-            const newCard = {
-                id: slug,
-                name: name,
-                imageUrl: 'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card',
-                savedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            userDocRef.update({
-                savedCards: firebase.firestore.FieldValue.arrayUnion(newCard)
-            }).then(() => {
-                // Update button states
-                document.querySelectorAll('.atlas-item .save-btn').forEach(btn => {
-                    const onclick = btn.getAttribute('onclick') || '';
-                    if (onclick.includes(slug)) {
-                        btn.innerHTML = '<i class="fas fa-check"></i> Saved';
-                        btn.classList.add('saved');
-                        btn.disabled = true;
-                    }
-                });
-            }).catch(err => {
-                console.error('Save error:', err);
-                alert('Error saving: ' + err.message);
-            });
-        };
-
-        // ============================================================
         // TOAST
         // ============================================================
         function cdToast(message, type) {
@@ -2031,88 +1849,283 @@
         }
 
         // ============================================================
-        // FIREBASE AUTH
+        // LOGOUT
         // ============================================================
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                userDocRef = db.collection('users').doc(user.uid);
+        window.handleLogout = function() {
+            if (unsubscribe) { unsubscribe();
+                unsubscribe = null; }
+            localStorage.removeItem(UID_KEY);
+            auth.signOut().then(() => {
+                window.location.href = 'https://camerasdecoded.com/login.html';
+            }).catch(() => {
+                window.location.href = 'https://camerasdecoded.com/login.html';
+            });
+        };
 
-                if (floatingLogoutBtn) floatingLogoutBtn.style.display = 'inline-block';
-                sidebarUsername.textContent = user.displayName || user.email || 'Operator';
-                sidebarEmail.textContent = user.email || '';
+        // ============================================================
+        // SAVE ATLAS CARD
+        // ============================================================
+        window.saveAtlasCard = function(slug, name) {
+            if (!currentUid) {
+                alert('Please log in first.');
+                return;
+            }
+            if (savedCardIds.includes(slug)) {
+                alert('Already saved.');
+                return;
+            }
 
-                // Show user badge
-                userBadge.style.display = 'inline-block';
-                userDocRef.get().then(doc => {
-                    if (doc.exists) {
-                        const tier = doc.data().tier || 'free';
-                        userBadge.textContent = tier === 'pro' ? 'Pro' : 'Free';
-                    }
-                }).catch(console.warn);
+            const newCard = {
+                id: slug,
+                name: name,
+                imageUrl: 'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card',
+                savedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
 
-                loginPrompt.classList.remove('show');
+            db.collection('users').doc(currentUid).update({
+                savedCards: firebase.firestore.FieldValue.arrayUnion(newCard)
+            }).then(() => {
+                // The snapshot will update the UI
+            }).catch(err => {
+                console.error('Save error:', err);
+                alert('Error saving: ' + err.message);
+            });
+        };
 
-                if (unsubscribe) unsubscribe();
-                unsubscribe = userDocRef.onSnapshot(doc => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        const cards = data.savedCards || [];
-                        renderSavedCards(cards);
-                        renderAtlas(filterAtlas());
-                        const tier = data.tier || 'free';
-                        userBadge.textContent = tier === 'pro' ? 'Pro' : 'Free';
-                    } else {
-                        userDocRef.set({
-                            savedCards: [],
-                            savedProtocols: [],
-                            savedBlogs: [],
-                            savedPodcasts: [],
-                            savedCommunityPosts: [],
-                            role: 'Operator',
-                            subscription: { tier: 'monthly', status: 'active' },
-                            name: user.displayName || '',
-                            username: user.email?.split('@')[0] || '',
-                            email: user.email || '',
-                            tier: 'free',
-                            billingInterval: 'monthly',
-                            preferences: { brands: [], lenses: [], interests: [] },
-                            confidence: 0,
-                            referralCode: '',
-                            totalReferrals: 0,
-                            totalCommissionEarned: 0,
-                            ambassadorTier: 'signal',
-                            tourCompleted: false,
-                            streakDays: 0,
-                            lastActiveDate: null,
-                            totalBonusPoints: 0
-                        }).then(() => {
-                            renderSavedCards([]);
-                            renderAtlas(filterAtlas());
-                        }).catch(console.error);
-                    }
-                }, error => {
-                    console.error('Snapshot error:', error);
+        // ============================================================
+        // REMOVE CARD
+        // ============================================================
+        function removeCard(cardId) {
+            if (!currentUid) return;
+            if (!confirm('Remove this card from your library?')) return;
+
+            db.collection('users').doc(currentUid).get().then(doc => {
+                if (!doc.exists) return;
+                const cards = doc.data().savedCards || [];
+                const cardToRemove = cards.find(c => c.id === cardId);
+                if (!cardToRemove) return;
+                return db.collection('users').doc(currentUid).update({
+                    savedCards: firebase.firestore.FieldValue.arrayRemove(cardToRemove)
                 });
-            } else {
-                currentUser = null;
-                if (unsubscribe) { unsubscribe();
-                    unsubscribe = null; }
-                if (floatingLogoutBtn) floatingLogoutBtn.style.display = 'none';
-                userBadge.style.display = 'none';
-                sidebarUsername.textContent = 'Guest';
-                sidebarEmail.textContent = '';
-                renderSavedCards([]);
-                renderAtlas(filterAtlas());
-                loginPrompt.classList.add('show');
+            }).catch(err => {
+                console.error('Remove error:', err);
+            });
+        }
+
+        // ============================================================
+        // MODAL ADD CARD
+        // ============================================================
+        modalAddBtn.addEventListener('click', async () => {
+            if (!currentUid) {
+                modalStatus.textContent = 'Please log in first.';
+                modalStatus.className = 'status-msg error';
+                return;
+            }
+
+            const name = modalCardName.value.trim();
+            if (!name) {
+                modalStatus.textContent = 'Please enter a card name.';
+                modalStatus.className = 'status-msg error';
+                return;
+            }
+
+            const imageUrl = modalCardImage.value.trim() ||
+                'https://via.placeholder.com/300x140/0A0A0A/8deb00?text=Snapshot+Card';
+            const id = 'card_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+
+            const newCard = {
+                id: id,
+                name: name,
+                imageUrl: imageUrl,
+                savedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            modalAddBtn.disabled = true;
+            modalAddBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            try {
+                await db.collection('users').doc(currentUid).update({
+                    savedCards: firebase.firestore.FieldValue.arrayUnion(newCard)
+                });
+                modalStatus.textContent = '✅ Card saved successfully!';
+                modalStatus.className = 'status-msg success';
+                modalCardName.value = '';
+                modalCardImage.value = '';
+                setTimeout(() => modal.classList.remove('open'), 1200);
+            } catch (err) {
+                console.error('Add card error:', err);
+                modalStatus.textContent = '❌ Error: ' + err.message;
+                modalStatus.className = 'status-msg error';
+            } finally {
+                modalAddBtn.disabled = false;
+                modalAddBtn.innerHTML = '<i class="fas fa-save"></i> Save to Library';
             }
         });
+
+        modalCardName.addEventListener('keydown', (e) => { if (e.key === 'Enter') modalAddBtn.click(); });
+        modalCardImage.addEventListener('keydown', (e) => { if (e.key === 'Enter') modalAddBtn.click(); });
+
+        // ============================================================
+        // MODAL OPEN/CLOSE
+        // ============================================================
+        openAddBtn.addEventListener('click', () => {
+            modal.classList.add('open');
+            modalCardName.value = '';
+            modalCardImage.value = '';
+            modalStatus.textContent = '';
+            modalStatus.className = 'status-msg';
+            modalAddBtn.disabled = false;
+            modalAddBtn.innerHTML = '<i class="fas fa-save"></i> Save to Library';
+            setTimeout(() => modalCardName.focus(), 200);
+        });
+
+        closeModal.addEventListener('click', () => modal.classList.remove('open'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('open');
+        });
+
+        // ============================================================
+        // CAROUSEL SCROLL
+        // ============================================================
+        carouselLeft.addEventListener('click', () => {
+            carouselTrack.scrollBy({ left: -200, behavior: 'smooth' });
+        });
+        carouselRight.addEventListener('click', () => {
+            carouselTrack.scrollBy({ left: 200, behavior: 'smooth' });
+        });
+
+        // ============================================================
+        // PROFILE PHOTO UPLOAD
+        // ============================================================
+        if (avatarUpload && profileAvatar) {
+            const savedPhoto = localStorage.getItem('profilePhoto');
+            if (savedPhoto) {
+                profileAvatar.style.backgroundImage = `url(${savedPhoto})`;
+            }
+            avatarUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const imgData = event.target.result;
+                        profileAvatar.style.backgroundImage = `url(${imgData})`;
+                        localStorage.setItem('profilePhoto', imgData);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // ============================================================
+        // LOAD USER DATA (using token, not auth)
+        // ============================================================
+        function loadUserData(uid) {
+            if (unsubscribe) {
+                unsubscribe();
+                unsubscribe = null;
+            }
+
+            currentUid = uid;
+            userDocRef = db.collection('users').doc(uid);
+
+            // Show UI elements
+            floatingLogoutBtn.style.display = 'inline-block';
+            userBadge.style.display = 'inline-block';
+            loginPrompt.classList.remove('show');
+
+            // Set sidebar profile from Firestore
+            userDocRef.get().then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    sidebarUsername.textContent = data.username || data.name || 'Operator';
+                    sidebarEmail.textContent = data.email || '';
+                    const tier = data.tier || 'free';
+                    userBadge.textContent = tier === 'pro' ? 'Pro' : 'Free';
+                } else {
+                    // Create doc if it doesn't exist
+                    userDocRef.set({
+                        savedCards: [],
+                        savedProtocols: [],
+                        savedBlogs: [],
+                        savedPodcasts: [],
+                        savedCommunityPosts: [],
+                        role: 'Operator',
+                        subscription: { tier: 'monthly', status: 'active' },
+                        name: '',
+                        username: '',
+                        email: '',
+                        tier: 'free',
+                        billingInterval: 'monthly',
+                        preferences: { brands: [], lenses: [], interests: [] },
+                        confidence: 0,
+                        referralCode: '',
+                        totalReferrals: 0,
+                        totalCommissionEarned: 0,
+                        ambassadorTier: 'signal',
+                        tourCompleted: false,
+                        streakDays: 0,
+                        lastActiveDate: null,
+                        totalBonusPoints: 0
+                    }).catch(console.error);
+                }
+            }).catch(console.error);
+
+            // Attach real-time listener
+            unsubscribe = userDocRef.onSnapshot(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    const cards = data.savedCards || [];
+                    renderSavedCards(cards);
+                    renderAtlas(filterAtlas());
+                    const tier = data.tier || 'free';
+                    userBadge.textContent = tier === 'pro' ? 'Pro' : 'Free';
+                    if (data.username) sidebarUsername.textContent = data.username;
+                    if (data.email) sidebarEmail.textContent = data.email;
+                } else {
+                    renderSavedCards([]);
+                    renderAtlas(filterAtlas());
+                }
+            }, error => {
+                console.error('Snapshot error:', error);
+            });
+        }
 
         // ============================================================
         // INIT
         // ============================================================
+        const uid = getCurrentUid();
+        if (uid) {
+            loadUserData(uid);
+        } else {
+            // No token – show login prompt
+            loginPrompt.classList.add('show');
+            floatingLogoutBtn.style.display = 'none';
+            userBadge.style.display = 'none';
+            sidebarUsername.textContent = 'Guest';
+            sidebarEmail.textContent = '';
+            renderSavedCards([]);
+            renderAtlas(filterAtlas());
+        }
+
+        // Also listen for Firebase Auth state (for logout button UI)
+        // but do NOT reload the Firestore listener – we already have one.
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // If auth user exists, update the UI but keep the existing listener.
+                // Optionally, switch to the auth uid if it differs from currentUid.
+                if (user.uid !== currentUid) {
+                    localStorage.setItem(UID_KEY, user.uid);
+                    loadUserData(user.uid);
+                }
+            }
+            // If user logs out, we handle it via handleLogout() which redirects.
+        });
+
+        // ============================================================
+        // FINAL INIT
+        // ============================================================
         renderAtlas(articles);
-        console.log('📦 Snapshot Library ready. All cards are clickable links.');
+        console.log('📦 Snapshot Library ready. Listening with uid:', currentUid);
     </script>
 
     <!-- Toast container -->
